@@ -16,226 +16,201 @@
 @media(max-width:560px){.brand{font-size:11px}.brand strong{font-size:16px}.home-content h1{font-size:40px}.form-grid{grid-template-columns:1fr}.span-2{grid-column:span 1}.world-head{align-items:flex-start;flex-direction:column}.world-map{height:680px}.village-card{width:46%;padding:10px 7px}.village-card strong{font-size:22px}.village-card small{font-size:10px}.village-card .village-icon{font-size:29px}.map-mascot{font-size:18px}.location-grid{grid-template-columns:1fr}.case-card{padding:18px}.case-situation{font-size:18px}.final-map{grid-template-columns:1fr}.badge-shell,.result-shell,.simple-shell{margin:15px;padding:24px}.editor-grid{grid-template-columns:1fr}.editor-grid .span-2{grid-column:span 1}}
 
 
-/* ===== v3.1 지도 화면: 지도 그 자체가 UI ===== */
-.world-map{
-  height:auto !important;
-  aspect-ratio:16/9;
-  background:#d5f1fb;
-  overflow:hidden;
+/* ===== v3.3 illustrated map =====
+   The generated illustration itself is the map UI.
+   No CSS-drawn fake islands; only transparent clickable hit areas + live progress. */
+.illustrated-map{
   position:relative;
-  border-radius:30px;
-  border:1px solid #c9e4ef;
-  box-shadow:0 20px 55px rgba(50,90,130,.13);
+  height:auto !important;
+  aspect-ratio:1445/695;
+  overflow:hidden;
+  border-radius:28px;
+  border:1px solid #cde7f3;
+  background:#b7e8fb;
+  box-shadow:0 20px 55px rgba(50,90,130,.14);
 }
-.world-bg{
+.illustrated-map .world-bg{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
   object-fit:contain !important;
   object-position:center;
-  background:#d5f1fb;
+  background:#b7e8fb;
 }
-.map-dim,.map-mascot{display:none !important}
+.illustrated-map .map-dim,
+.illustrated-map .map-mascot{display:none !important}
 
-/* 클릭 영역은 투명하게, 진행률만 보이게 */
-.village-card{
+/* Completely neutralize the old large cards. */
+.illustrated-map .map-hotspot{
   position:absolute;
-  width:32%;
-  height:33%;
-  padding:0;
-  border:0;
+  border:0 !important;
   background:transparent !important;
   box-shadow:none !important;
-  border-radius:28px;
-  display:block;
-  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
-  z-index:3;
+  padding:0 !important;
+  border-radius:30px;
+  display:block !important;
+  z-index:4;
+  transition:background .16s ease, box-shadow .16s ease;
 }
-.village-card:hover,
-.village-card:focus-visible{
-  transform:scale(1.025);
+.illustrated-map .map-hotspot:hover,
+.illustrated-map .map-hotspot:focus-visible{
+  transform:none !important;
   background:rgba(255,255,255,.10) !important;
-  box-shadow:0 0 0 4px rgba(255,255,255,.72),0 10px 28px rgba(40,70,110,.12) !important;
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,.65) !important;
   outline:none;
 }
-.village-card .village-icon,
-.village-card strong,
-.village-card small{display:none !important}
+.illustrated-map .map-hotspot .village-icon,
+.illustrated-map .map-hotspot strong,
+.illustrated-map .map-hotspot small{display:none !important}
 
-.village-card em{
+/* Cover the progress number baked into the illustration with the live value. */
+.illustrated-map .map-hotspot em{
   position:absolute;
-  top:10px;
-  right:12px;
-  font-style:normal;
-  background:rgba(255,255,255,.96);
-  color:#293044;
-  border:2px solid rgba(255,255,255,.9);
+  top:0;
+  left:50%;
+  right:auto;
+  transform:translate(-50%,-48%);
+  min-width:62px;
+  text-align:center;
+  background:#fffdf7;
+  color:#262f43;
+  border:2px solid rgba(203,164,79,.25);
   border-radius:999px;
-  padding:7px 12px;
+  padding:6px 12px;
+  font-style:normal;
   font-weight:900;
-  font-size:14px;
-  box-shadow:0 5px 15px rgba(33,58,91,.14);
+  font-size:15px;
+  box-shadow:0 5px 15px rgba(40,60,90,.12);
 }
-.map-hover-label{
+.illustrated-map .hover-name{
   position:absolute;
   left:50%;
-  bottom:10px;
-  transform:translateX(-50%) translateY(6px);
-  white-space:nowrap;
+  bottom:7%;
+  transform:translate(-50%,8px);
   opacity:0;
-  pointer-events:none;
+  white-space:nowrap;
   background:rgba(255,255,255,.96);
   border-radius:999px;
   padding:7px 12px;
   font-family:"Jua";
   font-size:18px;
-  color:#293044;
-  box-shadow:0 6px 18px rgba(35,60,90,.14);
-  transition:.18s ease;
-}
-.village-card:hover .map-hover-label,
-.village-card:focus-visible .map-hover-label{opacity:1;transform:translateX(-50%) translateY(0)}
-
-.village-card.complete:after{
-  content:"✓ 완료";
-  position:absolute;
-  left:12px;
-  top:10px;
-  right:auto;
-  background:#ff7e91;
-  color:white;
-  border:3px solid white;
-  border-radius:999px;
-  padding:5px 10px;
-  font-size:12px;
-  font-weight:900;
-  box-shadow:0 5px 14px rgba(70,40,50,.15);
-}
-
-/* 지도 이미지 안의 실제 섬 위치와 맞춘 클릭 영역 */
-.village-card.freedom{left:5%;top:8%}
-.village-card.safe{right:5%;top:8%}
-.village-card.dignity{left:9%;bottom:7%}
-.village-card.together{right:8%;bottom:7%}
-
-.world-head{margin-bottom:14px}
-.world-summary{margin-top:14px}
-
-@media(max-width:850px){
-  .world-map{aspect-ratio:4/3}
-  .village-card{width:42%;height:34%}
-  .village-card.freedom{left:3%;top:7%}
-  .village-card.safe{right:3%;top:7%}
-  .village-card.dignity{left:4%;bottom:6%}
-  .village-card.together{right:4%;bottom:6%}
-}
-@media(max-width:560px){
-  .world-map{aspect-ratio:3/4}
-  .world-bg{object-fit:contain !important}
-  .village-card{width:45%;height:31%}
-  .village-card em{font-size:12px;padding:5px 9px}
-  .map-hover-label{display:none}
-}
-
-
-/* ===== v3.2 CLEAN MAP: composite image removed completely ===== */
-.clean-map{
-  position:relative;
-  height:auto !important;
-  min-height:660px;
-  aspect-ratio:auto !important;
-  overflow:hidden;
-  border-radius:32px;
-  border:1px solid #cce8f3;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(255,255,255,.75) 0 3%, transparent 3.2%),
-    radial-gradient(circle at 83% 14%, rgba(255,255,255,.75) 0 2.6%, transparent 2.8%),
-    linear-gradient(180deg,#aee7ff 0%,#c7efff 38%,#8fdcf0 100%);
-  box-shadow:0 20px 55px rgba(49,96,128,.14);
-}
-.clean-map::before{
-  content:"";
-  position:absolute; inset:0;
-  background:
-    radial-gradient(ellipse at 18% 31%, rgba(255,255,255,.27), transparent 34%),
-    radial-gradient(ellipse at 80% 72%, rgba(255,255,255,.20), transparent 28%);
+  color:#283044;
+  box-shadow:0 7px 18px rgba(40,65,95,.16);
+  transition:.16s ease;
   pointer-events:none;
 }
-.world-bg,.village-card,.map-dim,.map-mascot{display:none !important}
+.illustrated-map .map-hotspot:hover .hover-name,
+.illustrated-map .map-hotspot:focus-visible .hover-name{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+.illustrated-map .map-hotspot.complete:after{
+  content:"✓ 마을 완료";
+  position:absolute;
+  top:6%;
+  left:6%;
+  right:auto;
+  background:#ff7188;
+  color:#fff;
+  border:3px solid #fff;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 5px 15px rgba(70,40,55,.17);
+}
 
-.sea-cloud{position:absolute;font-size:58px;filter:drop-shadow(0 4px 0 rgba(255,255,255,.35));opacity:.92;z-index:1}
-.cloud-a{left:3%;top:3%}.cloud-b{right:3%;top:5%}.tiny-boat{position:absolute;right:4%;bottom:4%;font-size:38px;z-index:2}
+/* Hotspots aligned to the actual four illustrated islands. */
+.illustrated-map .freedom{left:3.5%;top:4.5%;width:43%;height:45%}
+.illustrated-map .safe{right:3.5%;top:4.5%;width:43%;height:45%}
+.illustrated-map .dignity{left:3.5%;bottom:2.5%;width:43%;height:44%}
+.illustrated-map .together{right:3.5%;bottom:2.5%;width:43%;height:44%}
 
-.map-center{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:118px;height:118px;border-radius:50%;
-  background:rgba(255,255,255,.94);border:6px solid rgba(255,255,255,.9);
-  box-shadow:0 12px 28px rgba(41,79,107,.18);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4
-}
-.map-center .globe{font-size:48px;line-height:1}.map-center span{font-family:"Jua";font-size:16px;margin-top:4px}
-
-.village-island{
-  position:absolute;width:36%;height:34%;
-  border:5px solid rgba(255,255,255,.95);
-  box-shadow:0 12px 0 rgba(55,82,70,.10),0 18px 35px rgba(43,83,110,.16);
-  padding:23px 18px 17px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  color:#253044;transition:.18s ease;z-index:3;
-  overflow:visible;
-}
-.village-island::before{
-  content:"";position:absolute;left:8%;right:8%;bottom:-10px;height:25px;
-  background:rgba(211,184,116,.62);border-radius:50%;z-index:-1
-}
-.village-island:hover{transform:translateY(-5px) scale(1.02);filter:saturate(1.05)}
-.village-island:focus-visible{outline:5px solid rgba(255,255,255,.9);outline-offset:3px}
-
-.island-freedom{left:7%;top:7%;background:linear-gradient(145deg,#ccefff,#9fdcf5);border-radius:46% 54% 48% 52% / 57% 44% 56% 43%}
-.island-safe{right:7%;top:7%;background:linear-gradient(145deg,#ffdce4,#ffbfcf);border-radius:53% 47% 55% 45% / 45% 58% 42% 55%}
-.island-dignity{left:8%;bottom:7%;background:linear-gradient(145deg,#fff0b8,#ffd98b);border-radius:51% 49% 44% 56% / 56% 44% 57% 43%}
-.island-together{right:8%;bottom:7%;background:linear-gradient(145deg,#d5f5e8,#9ee2c8);border-radius:45% 55% 53% 47% / 44% 58% 42% 56%}
-
-.island-ribbon{
-  font-family:"Jua";font-size:30px;letter-spacing:-.02em;
-  background:#fff;border:3px solid rgba(255,255,255,.9);
-  padding:8px 18px;border-radius:999px;
-  box-shadow:0 5px 0 rgba(43,62,86,.09)
-}
-.island-landmarks{display:flex;gap:18px;font-size:36px;margin:13px 0 7px}
-.village-island small{font-weight:700;color:#566174;font-size:13px}
-.village-island em{
-  position:absolute;right:13px;top:13px;
-  font-style:normal;font-family:"Jua";font-size:18px;
-  background:#fff;padding:7px 12px;border-radius:999px;
-  box-shadow:0 5px 12px rgba(47,70,90,.12)
-}
-.village-island.complete::after{
-  content:"✓ 마을 완료";position:absolute;left:14px;top:13px;
-  background:#ff7088;color:#fff;border:3px solid #fff;
-  border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900
-}
-.map-helper{
-  position:absolute;left:50%;bottom:3%;transform:translateX(-50%);
-  z-index:5;background:#fff;border-radius:999px;padding:10px 18px;
-  font-family:"Jua";font-size:18px;box-shadow:0 8px 20px rgba(40,75,100,.14)
-}
-.map-helper span{font-family:"Noto Sans KR";font-size:12px;margin-left:7px;color:#667080}
+/* The baked counters sit near each village ribbon; position live pills on top of them. */
+.illustrated-map .freedom em{top:14.2%}
+.illustrated-map .safe em{top:14.2%}
+.illustrated-map .dignity em{top:18.2%}
+.illustrated-map .together em{top:18.2%}
 
 @media(max-width:850px){
-  .clean-map{min-height:760px}
-  .village-island{width:42%;height:31%;padding:18px 10px}
-  .island-freedom{left:4%;top:8%}.island-safe{right:4%;top:8%}
-  .island-dignity{left:4%;bottom:8%}.island-together{right:4%;bottom:8%}
-  .island-ribbon{font-size:24px}.island-landmarks{font-size:30px;gap:12px}
-  .map-center{width:96px;height:96px}.map-center .globe{font-size:38px}.map-center span{font-size:14px}
+  .illustrated-map{aspect-ratio:1445/695}
+  .illustrated-map .map-hotspot em{font-size:12px;min-width:50px;padding:5px 9px}
 }
 @media(max-width:560px){
-  .clean-map{min-height:820px}
-  .village-island{width:86%;height:20%;left:7%!important;right:auto!important}
-  .island-freedom{top:4%;bottom:auto}.island-safe{top:27%;bottom:auto}
-  .island-dignity{top:50%;bottom:auto}.island-together{top:73%;bottom:auto}
-  .map-center,.map-helper,.sea-cloud,.tiny-boat{display:none}
-  .island-ribbon{font-size:23px}.island-landmarks{font-size:27px;margin:8px 0 4px}
+  .world-shell{padding:10px}
+  .illustrated-map{border-radius:18px;aspect-ratio:1445/695}
+  .illustrated-map .hover-name{display:none}
+  .illustrated-map .map-hotspot.complete:after{font-size:9px;padding:4px 6px;border-width:2px}
+  .illustrated-map .map-hotspot em{font-size:10px;min-width:42px;padding:4px 7px}
+}
+
+
+/* ===== v4: 사건 해결 → 인권 배지 → 마을 배송 ===== */
+.delivery-map .map-hotspot{display:none!important}
+.progress-marker{
+  position:absolute;z-index:5;
+  background:rgba(255,255,255,.95);
+  border:3px solid rgba(255,255,255,.92);
+  border-radius:999px;
+  padding:8px 13px;
+  box-shadow:0 6px 18px rgba(40,65,95,.16);
+  display:flex;gap:8px;align-items:center;
+  font-size:13px;font-weight:800;
+}
+.progress-marker strong{font-family:"Jua";font-size:18px}
+.pm-freedom{left:13%;top:11%}
+.pm-safe{right:13%;top:11%}
+.pm-dignity{left:15%;bottom:12%}
+.pm-together{right:15%;bottom:12%}
+
+.map-courier{
+  position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);
+  z-index:6;background:#fff;border-radius:28px;padding:12px 15px;
+  box-shadow:0 9px 24px rgba(40,65,95,.17);text-align:center
+}
+.courier-face{font-family:"Jua";font-size:24px}
+.map-courier span{display:block;font-size:11px;font-weight:700;color:#657080;margin-top:3px}
+.world-actions{display:flex;gap:10px;align-items:center}
+.world-actions .primary{flex:1}
+
+.delivery-shell{
+  max-width:950px;margin:0 auto;padding:24px;
+}
+.delivery-head{text-align:center;margin:18px 0 14px}
+.delivery-head h1{font-family:"Jua";font-size:38px;margin:5px 0}
+.delivery-head p{color:#667080}
+.delivery-badge{
+  max-width:520px;margin:0 auto 22px;background:#fff9d9;border:4px solid #fff;
+  border-radius:26px;padding:22px;text-align:center;
+  box-shadow:0 10px 0 #e6bd61,0 18px 35px rgba(80,60,30,.13)
+}
+.delivery-emoji{font-size:48px}
+.delivery-badge strong{display:block;font-family:"Jua";font-size:27px;margin:6px 0}
+.delivery-badge small{display:block;color:#697181;line-height:1.6}
+.delivery-zones{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0
+}
+.delivery-zone{
+  min-height:150px;border:4px solid #fff;border-radius:26px;
+  box-shadow:0 9px 0 rgba(55,75,80,.09),0 17px 32px rgba(45,70,90,.11);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:.16s ease;color:#273044
+}
+.delivery-zone:hover{transform:translateY(-4px)}
+.delivery-zone span{font-size:38px}
+.delivery-zone strong{font-family:"Jua";font-size:27px;margin:5px 0}
+.delivery-zone small{font-weight:700;color:#5f6877}
+.dz-freedom{background:#ccefff}.dz-safe{background:#ffdbe3}.dz-dignity{background:#ffe6a6}.dz-together{background:#c8f0df}
+.delivery-zone:disabled{opacity:.72;cursor:default;transform:none}
+.earned-village{margin:12px auto 18px;background:#eef7ff;border-radius:999px;padding:9px 14px;width:max-content;max-width:100%;color:#49607f}
+
+@media(max-width:700px){
+  .delivery-zones{grid-template-columns:1fr}
+  .delivery-zone{min-height:110px}
+  .delivery-head h1{font-size:30px}
+  .progress-marker{font-size:10px;padding:5px 8px}
+  .progress-marker strong{font-size:14px}
+  .map-courier{display:none}
+  .pm-freedom{left:6%;top:8%}.pm-safe{right:6%;top:8%}.pm-dignity{left:7%;bottom:8%}.pm-together{right:7%;bottom:8%}
 }

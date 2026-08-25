@@ -49,71 +49,48 @@
         <div>
           <div id="studentBadge" class="student-badge"></div>
           <h1>인권마을 지도</h1>
-          <p>가고 싶은 마을부터 탐험해도 좋아요. 사건을 해결할 때마다 배지가 하나씩 생겨요!</p>
+          <p>사건을 해결하고 얻은 인권 배지를 <strong>알맞은 마을로 배달</strong>해 보세요.</p>
         </div>
         <div class="badge-counter"><span>내 배지</span><strong id="worldCount">0/20</strong></div>
       </div>
 
-      <div class="world-map clean-map">
-        <div class="sea-cloud cloud-a">☁️</div>
-        <div class="sea-cloud cloud-b">☁️</div>
-        <div class="tiny-boat">⛵</div>
-        <div class="map-center">
-          <div class="globe">🌍</div>
-          <span>인권광장</span>
+      <div class="world-map illustrated-map delivery-map">
+        <img src="./village-map.jpg" alt="네 개의 인권마을이 있는 인권마을 지도" class="world-bg">
+
+        <div class="progress-marker pm-freedom">
+          <span>🕊️ 자유마을</span><strong id="world-freedom">0/5</strong>
+        </div>
+        <div class="progress-marker pm-safe">
+          <span>🛡️ 안전마을</span><strong id="world-safe">0/5</strong>
+        </div>
+        <div class="progress-marker pm-dignity">
+          <span>🏠 생활마을</span><strong id="world-dignity">0/6</strong>
+        </div>
+        <div class="progress-marker pm-together">
+          <span>🌏 세계마을</span><strong id="world-together">0/4</strong>
         </div>
 
-        <button class="village-island island-freedom" data-zone="freedom" aria-label="자유마을 들어가기">
-          <div class="island-ribbon">🕊️ 자유마을</div>
-          <div class="island-landmarks"><span>🏫</span><span>💬</span><span>🗳️</span></div>
-          <small>생각하고 표현하며 참여하는 마을</small>
-          <em id="world-freedom">0/5</em>
-        </button>
-
-        <button class="village-island island-safe" data-zone="safe" aria-label="안전마을 들어가기">
-          <div class="island-ribbon">🛡️ 안전마을</div>
-          <div class="island-landmarks"><span>🏥</span><span>⚖️</span><span>🚓</span></div>
-          <small>차별 없이 안전하게 지내는 마을</small>
-          <em id="world-safe">0/5</em>
-        </button>
-
-        <button class="village-island island-dignity" data-zone="dignity" aria-label="생활마을 들어가기">
-          <div class="island-ribbon">🏠 생활마을</div>
-          <div class="island-landmarks"><span>📚</span><span>🛌</span><span>🎨</span></div>
-          <small>배우고 쉬고 생활하는 마을</small>
-          <em id="world-dignity">0/6</em>
-        </button>
-
-        <button class="village-island island-together" data-zone="together" aria-label="세계마을 들어가기">
-          <div class="island-ribbon">🌏 세계마을</div>
-          <div class="island-landmarks"><span>🌳</span><span>⛑️</span><span>🤝</span></div>
-          <small>세계와 함께 살아가는 마을</small>
-          <em id="world-together">0/4</em>
-        </button>
-
-        <div class="map-helper">૮ ˶ᵔ ᵕ ᵔ˶ ა <span>원하는 마을을 눌러봐!</span></div>
+        <div id="mapCourier" class="map-courier">
+          <div class="courier-face">૮ ˶ᵔ ᵕ ᵔ˶ ა</div>
+          <span>배달할 인권 배지를 모아보자!</span>
+        </div>
       </div>
 
       <div class="world-summary">
         <div class="progress-track"><div id="worldBar" class="progress-bar"></div></div>
-        <span id="worldMessage">첫 번째 마을을 골라보자!</span>
+        <span id="worldMessage">첫 번째 사건을 만나볼까요?</span>
       </div>
-      <button id="worldHomeBtn" class="ghost">처음 화면</button>
-    </section>
-  </main>
 
-  <main id="screen-village" class="screen">
-    <section class="village-shell">
-      <button id="backWorldBtn" class="ghost">← 인권마을 지도</button>
-      <div id="villageHeader" class="village-header"></div>
-      <div id="locationGrid" class="location-grid"></div>
-      <div class="village-tip"><span class="tip-mascot">ʕ•ᴥ•ʔ</span><span>장소를 눌러 사건을 해결해 보세요. 이미 해결한 곳은 배지가 보여요!</span></div>
+      <div class="world-actions">
+        <button id="getCaseBtn" class="primary xl">새 사건 만나기 🎫</button>
+        <button id="worldHomeBtn" class="ghost">처음 화면</button>
+      </div>
     </section>
   </main>
 
   <main id="screen-case" class="screen">
     <section class="case-shell">
-      <button id="caseBackBtn" class="ghost">← 마을로 돌아가기</button>
+      <button id="caseBackBtn" class="ghost">← 인권마을 지도</button>
       <article class="case-card">
         <div class="case-top">
           <div id="caseLocation" class="case-location"></div>
@@ -121,26 +98,64 @@
         </div>
         <div class="resident">
           <div class="resident-face">૮ ˶• ﻌ •˶ ა</div>
-          <div class="resident-bubble">이 사건에는 어떤 인권이 필요할까?</div>
+          <div class="resident-bubble">이 사건에서 가장 필요한 인권은 뭘까?</div>
         </div>
         <div id="caseSituation" class="case-situation"></div>
         <p class="choice-caption">가장 관련 있는 <strong>인권 배지</strong>를 골라주세요.</p>
         <div id="caseOptions" class="badge-options"></div>
         <div id="caseFeedback" class="feedback hidden"></div>
-        <button id="caseNextBtn" class="primary xl hidden">배지 받기 ✨</button>
+        <button id="toDeliveryBtn" class="primary xl hidden">이 배지를 어디로 보낼까? 📦</button>
       </article>
+    </section>
+  </main>
+
+  <main id="screen-delivery" class="screen">
+    <section class="delivery-shell">
+      <button id="deliveryBackBtn" class="ghost">← 사건 다시 보기</button>
+      <div class="delivery-head">
+        <div class="eyebrow">인권 배지 배송</div>
+        <h1>이 배지는 어느 마을로 가야 할까?</h1>
+        <p>배지의 뜻을 생각해서 가장 가까운 마을을 골라보세요.</p>
+      </div>
+
+      <div class="delivery-badge">
+        <div id="deliveryEmoji" class="delivery-emoji">🏅</div>
+        <strong id="deliveryRight"></strong>
+        <small id="deliveryExplanation"></small>
+      </div>
+
+      <div class="delivery-zones">
+        <button class="delivery-zone dz-freedom" data-zone="freedom">
+          <span>🕊️</span><strong>자유마을</strong><small>자유롭게 살 권리</small>
+        </button>
+        <button class="delivery-zone dz-safe" data-zone="safe">
+          <span>🛡️</span><strong>안전마을</strong><small>차별받지 않고 안전하게</small>
+        </button>
+        <button class="delivery-zone dz-dignity" data-zone="dignity">
+          <span>🏠</span><strong>생활마을</strong><small>인간답게 생활할 권리</small>
+        </button>
+        <button class="delivery-zone dz-together" data-zone="together">
+          <span>🌏</span><strong>세계마을</strong><small>함께 살아가기 위한 권리</small>
+        </button>
+      </div>
+      <div id="deliveryFeedback" class="feedback hidden"></div>
     </section>
   </main>
 
   <main id="screen-badge" class="screen">
     <section class="badge-shell">
-      <div class="sparkles">✨ ⭐ ✨</div>
-      <div class="earned-badge"><div id="earnedEmoji" class="earned-emoji">🏅</div><span>새 인권 배지</span><strong id="earnedRight"></strong></div>
+      <div class="sparkles">✨ 📦 ✨</div>
+      <div class="earned-badge">
+        <div id="earnedEmoji" class="earned-emoji">🏅</div>
+        <span>배달 완료!</span>
+        <strong id="earnedRight"></strong>
+      </div>
       <p id="earnedExplanation"></p>
-      <div class="mascot-celebrate">૮ ˶ᵔ ᵕ ᵔ˶ ა <span>사건 해결!</span></div>
+      <div id="earnedVillage" class="earned-village"></div>
+      <div class="mascot-celebrate">૮ ˶ᵔ ᵕ ᵔ˶ ა <span>인권지도에 하나 추가했어!</span></div>
       <div class="row-actions center">
-        <button id="nextPlaceBtn" class="primary">다음 장소로!</button>
-        <button id="badgeWorldBtn" class="ghost">다른 마을 가기</button>
+        <button id="nextCaseBtn" class="primary">다음 사건 만나기</button>
+        <button id="badgeWorldBtn" class="ghost">지도 확인하기</button>
       </div>
     </section>
   </main>

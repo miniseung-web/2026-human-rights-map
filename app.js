@@ -4,27 +4,36 @@ import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,getDocs,deleteDoc,on
 import {firebaseConfig,ADMIN_EMAIL} from "./firebase-config.js";
 import {CONTENT_VERSION,ZONES,DEFAULT_QUESTIONS,DEFAULT_MESSAGES} from "./questions.js";
 
+const GAME_VERSION = "2026-08-26-v4-delivery";
 const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb);
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], shuffle=a=>[...a].sort(()=>Math.random()-.5), rand=a=>a[Math.floor(Math.random()*a.length)];
-let settings={gameOpen:true,forceStop:false,previewEnabled:false,messages:structuredClone(DEFAULT_MESSAGES)},questions=structuredClone(DEFAULT_QUESTIONS),student=null,progress=null,currentZone=null,currentQuestion=null,attempt=0,studentCache=[],selectedAdminClass=1;
+let settings={gameOpen:true,forceStop:false,previewEnabled:false,messages:structuredClone(DEFAULT_MESSAGES)},questions=structuredClone(DEFAULT_QUESTIONS),student=null,progress=null,currentQuestion=null,answerAttempt=0,deliveryAttempt=0,studentCache=[],selectedAdminClass=1;
 
-function show(id){$$(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");window.scrollTo({top:0});$("#topProgress").classList.toggle("hidden",!["#screen-world","#screen-village","#screen-case","#screen-badge"].includes(id));}
+function show(id){
+  $$(".screen").forEach(x=>x.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo({top:0});
+  $("#topProgress").classList.toggle("hidden",!["#screen-world","#screen-case","#screen-delivery","#screen-badge"].includes(id));
+}
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hidden"),2200);}
-function modal(html){$("#modalContent").innerHTML=html;$("#modal").classList.remove("hidden")} function closeModal(){$("#modal").classList.add("hidden")}
+function modal(html){$("#modalContent").innerHTML=html;$("#modal").classList.remove("hidden")}
+function closeModal(){$("#modal").classList.add("hidden")}
 $("#modalClose").onclick=closeModal;$("#modal").onclick=e=>{if(e.target.id==="modal")closeModal()}
-function sid(c,n){return `${c}-${String(n).padStart(2,"0")}`}
-function solvedIds(){return Object.entries(progress?.solved||{}).filter(([,v])=>v?.done).map(([k])=>k)}
-function zoneSolved(z){return questions.filter(q=>q.zone===z && progress?.solved?.[q.id]?.done).length}
-function totalSolved(){return solvedIds().length}
-function questionById(id){return questions.find(q=>q.id===id)}
+const sid=(c,n)=>`${c}-${String(n).padStart(2,"0")}`;
+const solvedIds=()=>Object.entries(progress?.solved||{}).filter(([,v])=>v?.done).map(([k])=>k);
+const totalSolved=()=>solvedIds().length;
+const zoneSolved=z=>questions.filter(q=>q.zone===z&&progress?.solved?.[q.id]?.done).length;
+const questionById=id=>questions.find(q=>q.id===id);
+const unsolved=()=>questions.filter(q=>!progress?.solved?.[q.id]?.done);
 function renderTop(){$("#topProgress strong").textContent=`${totalSolved()}/20`}
-function optsFor(q){const pool=questions.filter(x=>x.zone===q.zone&&x.id!==q.id).map(x=>x.right);return shuffle([q.right,...shuffle(pool).slice(0,3)])}
+function zoneLabel(z){return ZONES[z]?.label||z}
+function shortZoneFull(z){return ZONES[z]?.full||""}
 
 function setupSelectors(){
- $("#classSelect").innerHTML=Array.from({length:7},(_,i)=>`<option value="${i+1}">${i+1}반</option>`).join("");
- $("#numberSelect").innerHTML=Array.from({length:28},(_,i)=>`<option value="${i+1}">${i+1}번</option>`).join("");
- $("#statsClassSelect").innerHTML=`<option value="all">전체</option>`+Array.from({length:7},(_,i)=>`<option value="${i+1}">${i+1}반</option>`).join("");
- $("#classTabs").innerHTML=Array.from({length:7},(_,i)=>`<button data-class="${i+1}" class="${i===0?"active":""}">${i+1}반</button>`).join("");
+  $("#classSelect").innerHTML=Array.from({length:7},(_,i)=>`<option value="${i+1}">${i+1}반</option>`).join("");
+  $("#numberSelect").innerHTML=Array.from({length:28},(_,i)=>`<option value="${i+1}">${i+1}번</option>`).join("");
+  $("#statsClassSelect").innerHTML=`<option value="all">전체</option>`+Array.from({length:7},(_,i)=>`<option value="${i+1}">${i+1}반</option>`).join("");
+  $("#classTabs").innerHTML=Array.from({length:7},(_,i)=>`<button data-class="${i+1}" class="${i===0?"active":""}">${i+1}반</button>`).join("");
 }
 setupSelectors();
 
@@ -32,70 +41,195 @@ async function ensureAnon(){if(auth.currentUser?.email===ADMIN_EMAIL)await signO
 async function loadSettings(){try{const s=await getDoc(doc(db,"config","settings"));if(s.exists())settings={...settings,...s.data()};else await setDoc(doc(db,"config","settings"),settings)}catch(e){console.warn(e)}renderHomeState()}
 async function loadQuestions(){try{const r=doc(db,"config","questions"),s=await getDoc(r),d=s.exists()?s.data():null;if(d?.contentVersion===CONTENT_VERSION&&Array.isArray(d.items))questions=d.items;else{questions=structuredClone(DEFAULT_QUESTIONS);await setDoc(r,{items:questions,contentVersion:CONTENT_VERSION,updatedAt:serverTimestamp()})}}catch(e){console.warn(e)}}
 function renderHomeState(){$("#closedBanner").classList.toggle("hidden",settings.gameOpen);$("#startBtn").disabled=!settings.gameOpen;$("#startBtn").style.opacity=settings.gameOpen?"1":".55"}
-onSnapshot(doc(db,"config","settings"),s=>{if(s.exists()){settings={...settings,...s.data()};renderHomeState();if(!settings.gameOpen&&settings.forceStop&&["screen-world","screen-village","screen-case","screen-badge"].some(x=>$(`#${x}`).classList.contains("active"))){toast("선생님이 게임을 마감했습니다.");setTimeout(()=>show("#screen-home"),800)}}});
+onSnapshot(doc(db,"config","settings"),s=>{if(s.exists()){settings={...settings,...s.data()};renderHomeState();if(!settings.gameOpen&&settings.forceStop&&["screen-world","screen-case","screen-delivery","screen-badge"].some(x=>$(`#${x}`).classList.contains("active"))){toast("선생님이 게임을 마감했습니다.");setTimeout(()=>show("#screen-home"),800)}}});
 
 $("#startBtn").onclick=async()=>{
- if(!settings.gameOpen)return toast("현재 게임이 마감되었습니다.");
- const cls=+$("#classSelect").value,num=+$("#numberSelect").value,name=$("#nameInput").value.trim();if(!name)return toast("이름을 입력해 주세요.");await ensureAnon();
- const id=sid(cls,num),r=doc(db,"students",id),s=await getDoc(r);
- if(s.exists()){
-   const d=s.data();if(d.name&&d.name!==name)return toast("등록된 이름과 다릅니다. 이름을 확인해 주세요.");
-   if(d.progress?.contentVersion!==CONTENT_VERSION){
-     modal(`<h2>게임이 새롭게 바뀌었어요!</h2><p>새로운 ‘인권마을 탐험’ 버전으로 처음부터 시작합니다.</p><button id="newVersionBtn" class="primary xl">새 탐험 시작</button>`);
-     $("#newVersionBtn").onclick=async()=>{closeModal();await createStudent(id,cls,num,name)};return;
-   }
-   student={id,cls,num,name};progress=d.progress;
-   if(progress.completed){showResult();return}
-   modal(`<h2>탐험을 이어갈까요?</h2><p>현재 <strong>${totalSolved()} / 20</strong>개의 배지를 모았어요.</p><div class="row-actions"><button id="resumeBtn" class="primary">이어하기</button><button id="restartBtn" class="ghost">처음부터</button></div>`);
-   $("#resumeBtn").onclick=()=>{closeModal();enterWorld()};$("#restartBtn").onclick=async()=>{if(confirm("기존 기록을 지우고 처음부터 시작할까요?")){closeModal();await createStudent(id,cls,num,name)}};
- }else await createStudent(id,cls,num,name);
+  if(!settings.gameOpen)return toast("현재 게임이 마감되었습니다.");
+  const cls=+$("#classSelect").value,num=+$("#numberSelect").value,name=$("#nameInput").value.trim();
+  if(!name)return toast("이름을 입력해 주세요.");
+  await ensureAnon();
+  const id=sid(cls,num),r=doc(db,"students",id),s=await getDoc(r);
+  if(s.exists()){
+    const d=s.data();
+    if(d.name&&d.name!==name)return toast("등록된 이름과 다릅니다. 이름을 확인해 주세요.");
+    if(d.progress?.gameVersion!==GAME_VERSION){
+      modal(`<h2>게임이 새롭게 바뀌었어요!</h2><p>이번 버전에서는 사건을 해결한 뒤 인권 배지를 직접 알맞은 마을에 배달합니다.</p><button id="newVersionBtn" class="primary xl">새 게임 시작</button>`);
+      $("#newVersionBtn").onclick=async()=>{closeModal();await createStudent(id,cls,num,name)};return;
+    }
+    student={id,cls,num,name};progress=d.progress;
+    if(progress.completed){showResult();return}
+    modal(`<h2>이어할까요?</h2><p>현재 <strong>${totalSolved()} / 20</strong>개의 인권 배지를 배달했습니다.</p><div class="row-actions"><button id="resumeBtn" class="primary">이어하기</button><button id="restartBtn" class="ghost">처음부터</button></div>`);
+    $("#resumeBtn").onclick=()=>{closeModal();enterWorld()};
+    $("#restartBtn").onclick=async()=>{if(confirm("기존 기록을 지우고 처음부터 시작할까요?")){closeModal();await createStudent(id,cls,num,name)}};
+  }else await createStudent(id,cls,num,name);
 };
-async function createStudent(id,cls,num,name){student={id,cls,num,name};progress={contentVersion:CONTENT_VERSION,solved:{},answers:{},startedAt:new Date().toISOString(),completed:false,completedAt:null,lastZone:null};await setDoc(doc(db,"students",id),{cls,num,name,status:"doing",progress,updatedAt:serverTimestamp()});enterWorld()}
-async function save(){try{await updateDoc(doc(db,"students",student.id),{progress,status:progress.completed?"done":"doing",updatedAt:serverTimestamp()})}catch(e){console.error(e);toast("잠시 저장하지 못했어요. 인터넷 연결을 확인해 주세요.")}}
+
+async function createStudent(id,cls,num,name){
+  student={id,cls,num,name};
+  progress={
+    gameVersion:GAME_VERSION,
+    solved:{},
+    answers:{},
+    deliveries:{},
+    startedAt:new Date().toISOString(),
+    completed:false,
+    completedAt:null,
+    currentQuestionId:null
+  };
+  await setDoc(doc(db,"students",id),{cls,num,name,status:"doing",progress,updatedAt:serverTimestamp()});
+  enterWorld();
+}
+async function save(){
+  try{await updateDoc(doc(db,"students",student.id),{progress,status:progress.completed?"done":"doing",updatedAt:serverTimestamp()})}
+  catch(e){console.error(e);toast("잠시 저장하지 못했어요. 인터넷 연결을 확인해 주세요.")}
+}
 
 function enterWorld(){
- $("#studentBadge").textContent=`${student.cls}반 ${student.num}번 ${student.name}`;renderWorld();show("#screen-world")
+  $("#studentBadge").textContent=`${student.cls}반 ${student.num}번 ${student.name}`;
+  renderWorld();
+  show("#screen-world");
 }
 function renderWorld(){
- const total=totalSolved();$("#worldCount").textContent=`${total}/20`;$("#worldBar").style.width=`${total/20*100}%`;renderTop();
- Object.keys(ZONES).forEach(z=>{const n=zoneSolved(z),t=ZONES[z].target;$(`#world-${z}`).textContent=`${n}/${t}`;(document.querySelector(`.village-island[data-zone="${z}"]`)||document.querySelector(`.village-card[data-zone="${z}"]`))?.classList.toggle("complete",n===t)});
- $("#worldMessage").textContent=total===0?"첫 번째 마을을 골라보자!":total<10?"배지가 차곡차곡 모이고 있어!":total<20?"절반 넘었어! 마지막까지 탐험해 보자!":"모든 배지를 모았어!";
- if(total===20&&!progress.completed)showResult();
+  const total=totalSolved();
+  $("#worldCount").textContent=`${total}/20`;
+  $("#worldBar").style.width=`${total/20*100}%`;
+  Object.keys(ZONES).forEach(z=>{
+    const n=zoneSolved(z);
+    const el=$(`#world-${z}`);
+    if(el)el.textContent=`${n}/${ZONES[z].target}`;
+  });
+  $("#worldMessage").textContent=
+    total===0?"첫 번째 사건을 만나볼까요?":
+    total<5?"좋아! 인권지도가 하나씩 채워지고 있어요.":
+    total<10?"벌써 여러 마을에 배지를 배달했어요!":
+    total<15?"절반 넘었어! 이제 어떤 권리인지 감이 오지?":
+    total<20?"거의 다 왔어! 마지막 배지까지 가보자!":
+    "인권지도 완성!";
+  renderTop();
+  if(total===20&&!progress.completed)showResult();
 }
-$$(".village-card, .village-island").forEach(b=>b.onclick=()=>openVillage(b.dataset.zone));
-function openVillage(z){currentZone=z;progress.lastZone=z;renderVillage();show("#screen-village");save()}
-function zoneBg(z){return z==="freedom"?"#dff4ff":z==="safe"?"#ffe5eb":z==="dignity"?"#fff0c5":"#dff7ed"}
-function renderVillage(){
- const meta=ZONES[currentZone],items=questions.filter(q=>q.zone===currentZone),done=zoneSolved(currentZone);
- $("#villageHeader").style.background=zoneBg(currentZone);$("#villageHeader").innerHTML=`<div class="big-icon">${meta.icon}</div><div><div class="eyebrow">${done}/${meta.target} 배지 획득</div><h1>${meta.label}</h1><p>${meta.description}</p></div>`;
- $("#locationGrid").innerHTML=items.map(q=>{const s=progress.solved?.[q.id]?.done;return `<button class="location-card ${s?"solved":""}" data-id="${q.id}" style="background:${zoneBg(currentZone)}"><span class="loc-emoji">${q.emoji}</span><strong>${q.location}</strong><small>${s?`획득: ${q.right}`:"사건이 기다리고 있어요"}</small></button>`}).join("");
- $$(".location-card").forEach(b=>b.onclick=()=>openCase(b.dataset.id));
- renderTop();
+
+$("#worldHomeBtn").onclick=()=>show("#screen-home");
+$("#getCaseBtn").onclick=()=>openNextCase();
+
+function openNextCase(){
+  const remain=unsolved();
+  if(!remain.length)return showResult();
+  // Mix categories so students cannot infer category from sequence.
+  currentQuestion=shuffle(remain)[0];
+  progress.currentQuestionId=currentQuestion.id;
+  answerAttempt=0;
+  deliveryAttempt=0;
+  renderCase();
+  save();
 }
-$("#backWorldBtn").onclick=enterWorld;$("#worldHomeBtn").onclick=()=>show("#screen-home");
-function openCase(id){
- currentQuestion=questionById(id);attempt=0;$("#caseLocation").textContent=`${currentQuestion.emoji} ${currentQuestion.location}`;$("#caseCount").textContent=`${zoneSolved(currentQuestion.zone)}/${ZONES[currentQuestion.zone].target}`;$("#caseSituation").textContent=currentQuestion.situation;$("#caseFeedback").className="feedback hidden";$("#caseNextBtn").classList.add("hidden");
- $("#caseOptions").innerHTML=optsFor(currentQuestion).map(x=>`<button>${x}</button>`).join("");$$("#caseOptions button").forEach(b=>b.onclick=()=>answerCase(b.textContent));show("#screen-case");renderTop();
+function renderCase(){
+  $("#caseLocation").textContent=`${currentQuestion.emoji} ${currentQuestion.location}`;
+  $("#caseCount").textContent=`배지 ${totalSolved()+1} / 20`;
+  $("#caseSituation").textContent=currentQuestion.situation;
+  $("#caseFeedback").className="feedback hidden";
+  $("#toDeliveryBtn").classList.add("hidden");
+  const distractors=shuffle(questions.filter(q=>q.id!==currentQuestion.id).map(q=>q.right)).slice(0,3);
+  const choices=shuffle([currentQuestion.right,...distractors]);
+  $("#caseOptions").innerHTML=choices.map(x=>`<button>${x}</button>`).join("");
+  $$("#caseOptions button").forEach(b=>b.onclick=()=>answerCase(b.textContent));
+  show("#screen-case");
+  renderTop();
 }
-$("#caseBackBtn").onclick=()=>openVillage(currentZone);
+$("#caseBackBtn").onclick=enterWorld;
+
 async function answerCase(choice){
- if(progress.solved?.[currentQuestion.id]?.done)return;
- attempt++;const ok=choice===currentQuestion.right,a=progress.answers[currentQuestion.id]||{tries:[],firstCorrect:null,revealed:false};a.tries.push(choice);if(a.firstCorrect===null)a.firstCorrect=ok;progress.answers[currentQuestion.id]=a;
- if(ok){$("#caseFeedback").className="feedback good";$("#caseFeedback").innerHTML=`<strong>${rand(settings.messages?.correct||DEFAULT_MESSAGES.correct)}</strong><br>${currentQuestion.explanation}`;$("#caseOptions").innerHTML="";$("#caseNextBtn").classList.remove("hidden");$("#caseNextBtn").onclick=()=>earnBadge(false)}
- else if(attempt===1){$("#caseFeedback").className="feedback warn";$("#caseFeedback").textContent=rand(settings.messages?.firstWrong||DEFAULT_MESSAGES.firstWrong)}
- else{a.revealed=true;$("#caseFeedback").className="feedback warn";$("#caseFeedback").innerHTML=`정답은 <strong>「${currentQuestion.right}」</strong>예요.<br>${currentQuestion.explanation}<br><small>${settings.messages?.secondWrong||DEFAULT_MESSAGES.secondWrong}</small>`;$("#caseOptions").innerHTML="";$("#caseNextBtn").classList.remove("hidden");$("#caseNextBtn").onclick=()=>earnBadge(true)}
- await save();
+  answerAttempt++;
+  const ok=choice===currentQuestion.right;
+  const a=progress.answers[currentQuestion.id]||{tries:[],firstCorrect:null,revealed:false};
+  a.tries.push(choice);
+  if(a.firstCorrect===null)a.firstCorrect=ok;
+  progress.answers[currentQuestion.id]=a;
+
+  if(ok){
+    $("#caseFeedback").className="feedback good";
+    $("#caseFeedback").innerHTML=`<strong>${rand(settings.messages?.correct||DEFAULT_MESSAGES.correct)}</strong><br>${currentQuestion.explanation}`;
+    $("#caseOptions").innerHTML="";
+    $("#toDeliveryBtn").classList.remove("hidden");
+  }else if(answerAttempt===1){
+    $("#caseFeedback").className="feedback warn";
+    $("#caseFeedback").textContent=rand(settings.messages?.firstWrong||DEFAULT_MESSAGES.firstWrong);
+  }else{
+    a.revealed=true;
+    $("#caseFeedback").className="feedback warn";
+    $("#caseFeedback").innerHTML=`정답은 <strong>「${currentQuestion.right}」</strong>예요.<br>${currentQuestion.explanation}<br><small>${settings.messages?.secondWrong||DEFAULT_MESSAGES.secondWrong}</small>`;
+    $("#caseOptions").innerHTML="";
+    $("#toDeliveryBtn").classList.remove("hidden");
+  }
+  await save();
 }
-async function earnBadge(revealed){
- progress.solved[currentQuestion.id]={done:true,zone:currentQuestion.zone,right:currentQuestion.right,revealed,at:new Date().toISOString()};await save();$("#earnedEmoji").textContent=currentQuestion.emoji;$("#earnedRight").textContent=currentQuestion.right;$("#earnedExplanation").textContent=currentQuestion.explanation;show("#screen-badge");renderTop();
+
+$("#toDeliveryBtn").onclick=()=>openDelivery();
+function openDelivery(){
+  $("#deliveryEmoji").textContent=currentQuestion.emoji;
+  $("#deliveryRight").textContent=currentQuestion.right;
+  $("#deliveryExplanation").textContent=currentQuestion.explanation;
+  $("#deliveryFeedback").className="feedback hidden";
+  deliveryAttempt=0;
+  $$(".delivery-zone").forEach(b=>{b.disabled=false;b.onclick=()=>answerDelivery(b.dataset.zone)});
+  show("#screen-delivery");
+  renderTop();
 }
+$("#deliveryBackBtn").onclick=()=>renderCase();
+
+async function answerDelivery(zone){
+  deliveryAttempt++;
+  const ok=zone===currentQuestion.zone;
+  const d=progress.deliveries[currentQuestion.id]||{tries:[],firstCorrect:null,revealed:false};
+  d.tries.push(zone);
+  if(d.firstCorrect===null)d.firstCorrect=ok;
+  progress.deliveries[currentQuestion.id]=d;
+
+  if(ok){
+    $("#deliveryFeedback").className="feedback good";
+    $("#deliveryFeedback").innerHTML=`<strong>배송 성공!</strong> 「${currentQuestion.right}」은(는) <strong>${zoneLabel(zone)}</strong>로 보내면 돼요.`;
+    $$(".delivery-zone").forEach(b=>b.disabled=true);
+    await save();
+    setTimeout(()=>completeDelivery(false),650);
+  }else if(deliveryAttempt===1){
+    $("#deliveryFeedback").className="feedback warn";
+    $("#deliveryFeedback").innerHTML=`한 번 더 생각해 볼까? <strong>${currentQuestion.right}</strong>은 어떤 삶을 보장하는 권리일까요?`;
+  }else{
+    d.revealed=true;
+    $("#deliveryFeedback").className="feedback warn";
+    $("#deliveryFeedback").innerHTML=`이 배지는 <strong>${zoneLabel(currentQuestion.zone)}</strong>로 보내면 돼요.<br><small>${shortZoneFull(currentQuestion.zone)}</small>`;
+    $$(".delivery-zone").forEach(b=>b.disabled=true);
+    await save();
+    setTimeout(()=>completeDelivery(true),850);
+  }
+}
+async function completeDelivery(revealed){
+  progress.solved[currentQuestion.id]={
+    done:true,
+    zone:currentQuestion.zone,
+    right:currentQuestion.right,
+    answerRevealed:!!progress.answers[currentQuestion.id]?.revealed,
+    deliveryRevealed:revealed,
+    at:new Date().toISOString()
+  };
+  await save();
+  $("#earnedEmoji").textContent=currentQuestion.emoji;
+  $("#earnedRight").textContent=currentQuestion.right;
+  $("#earnedExplanation").textContent=currentQuestion.explanation;
+  $("#earnedVillage").innerHTML=`📦 <strong>${zoneLabel(currentQuestion.zone)}</strong>에 배달 완료`;
+  show("#screen-badge");
+  renderTop();
+}
+$("#nextCaseBtn").onclick=()=>openNextCase();
 $("#badgeWorldBtn").onclick=enterWorld;
-$("#nextPlaceBtn").onclick=()=>{
- const remain=questions.filter(q=>q.zone===currentQuestion.zone&&!progress.solved?.[q.id]?.done);
- if(remain.length){openCase(remain[0].id)}else{toast(`${ZONES[currentQuestion.zone].label} 완성! 🎉`);setTimeout(enterWorld,650)}
-};
-async function showResult(){if(!progress.completed){progress.completed=true;progress.completedAt=new Date().toISOString();await save()}renderTop();show("#screen-result")}
-$("#finishBtn").onclick=()=>settings.previewEnabled?show("#screen-preview"):show("#screen-done");$("#previewCloseBtn").onclick=()=>show("#screen-done");$("#doneHomeBtn").onclick=()=>show("#screen-home");
+
+async function showResult(){
+  if(!progress.completed){progress.completed=true;progress.completedAt=new Date().toISOString();await save()}
+  renderTop();show("#screen-result");
+}
+$("#finishBtn").onclick=()=>settings.previewEnabled?show("#screen-preview"):show("#screen-done");
+$("#previewCloseBtn").onclick=()=>show("#screen-done");
+$("#doneHomeBtn").onclick=()=>show("#screen-home");
 
 $("#adminEntryBtn").onclick=()=>{modal(`<h2>관리자 로그인</h2><p class="micro">관리자 번호를 입력하세요.</p><input id="adminPinInput" type="password" inputmode="numeric" placeholder="관리자 번호"><button id="adminLoginSubmit" class="primary xl" style="margin-top:12px">로그인</button>`);$("#adminLoginSubmit").onclick=adminLogin;$("#adminPinInput").addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()})}
 async function adminLogin(){const pin=$("#adminPinInput").value.trim();if(!pin)return toast("관리자 번호를 입력해 주세요.");try{if(auth.currentUser)await signOut(auth);await signInWithEmailAndPassword(auth,ADMIN_EMAIL,pin);closeModal();await loadAdmin();show("#screen-admin")}catch(e){console.error(e);toast("관리자 번호를 확인해 주세요.")}}
