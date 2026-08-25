@@ -1,110 +1,194 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>인권지도 만들기</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>인권마을 탐험</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <div id="app">
   <header class="topbar">
     <button id="adminEntryBtn" class="ghost small">관리자</button>
-    <div class="brand">인권지도 만들기</div><div class="spacer"></div>
+    <div class="brand">🌱 승민샘과 함께하는 <strong>도덕도덕</strong></div>
+    <div class="spacer"></div>
+    <div id="topProgress" class="top-progress hidden">🏅 <strong>0/20</strong></div>
   </header>
 
   <main id="screen-home" class="screen active">
-    <section class="hero card cute-card">
-      <div class="mascot-stage" aria-hidden="true">
-        <div class="mascot mascot-pup"><span class="ear e1"></span><span class="ear e2"></span><span class="eye l"></span><span class="eye r"></span><span class="mouth">ω</span><span class="blush b1"></span><span class="blush b2"></span></div>
-        <div class="speech-bubble">인권지도를 같이 만들어 볼까?</div>
-        <div class="mascot mascot-bun"><span class="ear e1"></span><span class="ear e2"></span><span class="eye l"></span><span class="eye r"></span><span class="mouth">ᴗ</span><span class="blush b1"></span><span class="blush b2"></span></div>
-      </div>
-      <div class="teacher-tag">🌱 승민샘과 함께하는 <strong>도덕도덕</strong></div>
-        <div class="eyebrow">중학교 1학년 도덕</div>
-      <h1>인권지도 만들기</h1>
-      <p class="lead">인간답게 살아가기 위해 필요한 권리를 찾아봅시다.</p>
-      <div id="closedBanner" class="notice danger hidden">현재 게임이 마감되었습니다. 선생님의 안내를 기다려 주세요.</div>
-      <div class="form-grid">
-        <label>반<select id="classSelect"></select></label>
-        <label>번호<select id="numberSelect"></select></label>
-        <label class="span-2">이름<input id="nameInput" type="text" maxlength="12" placeholder="이름을 입력하세요" autocomplete="off" /></label>
-      </div>
-      <button id="startBtn" class="primary xl">시작하기</button>
-      <p class="micro">※ 이 인권지도는 다양한 인권을 쉽게 이해하기 위해 수업에서 재구성한 것입니다.</p>
-    </section>
-  </main>
-
-  <main id="screen-game" class="screen">
-    <section class="game-shell">
-      <div class="game-head">
-        <div><div id="studentBadge" class="badge"></div><h2 id="phaseTitle">상황을 읽고 관련된 인권을 찾아보세요.</h2></div>
-        <div class="progress-box">
-          <div class="progress-label"><span>인권지도 완성도</span><strong id="progressText">0 / 20</strong></div>
-          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+    <section class="home-card">
+      <div class="hero-visual">
+        <div class="cute-cloud c1"></div><div class="cute-cloud c2"></div>
+        <div class="original-mascot">
+          <div class="fluffy">૮ ˶ᵔ ᵕ ᵔ˶ ა</div>
+          <div class="mascot-bubble">인권 배지를 모으러 출발!</div>
         </div>
       </div>
-      <div id="mapBoard" class="map-board">
-        <button class="zone zone-top" data-zone="freedom"><span class="zone-icon">💬</span><span class="zone-title">자유롭게 살 권리</span><span id="count-freedom" class="zone-count">0/5</span><span id="chips-freedom" class="zone-chips"></span></button>
-        <button class="zone zone-right" data-zone="safe"><span class="zone-icon">🛡️</span><span class="zone-title">차별받지 않고<br>안전하게 살 권리</span><span id="count-safe" class="zone-count">0/5</span><span id="chips-safe" class="zone-chips"></span></button>
-        <button class="zone zone-bottom" data-zone="dignity"><span class="zone-icon">🏠</span><span class="zone-title">인간답게 생활할 권리</span><span id="count-dignity" class="zone-count">0/6</span><span id="chips-dignity" class="zone-chips"></span></button>
-        <button class="zone zone-left" data-zone="together"><span class="zone-icon">🌏</span><span class="zone-title">함께 살아가기 위한 권리</span><span id="count-together" class="zone-count">0/4</span><span id="chips-together" class="zone-chips"></span></button>
-        <article id="questionCard" class="question-card"><div class="mini-mascot" aria-hidden="true">•ᴗ•</div>
-          <div id="stepPill" class="step-pill">STEP 1</div>
-          <div id="questionText" class="question-text"></div>
-          <div id="answerOptions" class="answer-options"></div>
-          <div id="feedback" class="feedback hidden"></div>
-          <button id="nextStepBtn" class="primary hidden">다음 단계</button>
-        </article>
+      <div class="home-content">
+        <div class="eyebrow">중학교 1학년 도덕</div>
+        <h1>인권마을 탐험</h1>
+        <p class="lead">4개의 마을을 돌아다니며 사건을 해결하고<br><strong>인권 배지 20개</strong>를 모두 모아보세요!</p>
+        <div id="closedBanner" class="notice danger hidden">현재 게임이 마감되었습니다. 선생님의 안내를 기다려 주세요.</div>
+        <div class="form-grid">
+          <label>반<select id="classSelect"></select></label>
+          <label>번호<select id="numberSelect"></select></label>
+          <label class="span-2">이름<input id="nameInput" maxlength="12" placeholder="이름을 입력하세요"></label>
+        </div>
+        <button id="startBtn" class="primary xl">탐험 시작하기 ▶</button>
+        <p class="micro">※ 네 마을은 다양한 인권을 쉽게 이해하기 위해 수업에서 재구성한 인권지도입니다.</p>
       </div>
-      <div class="game-footer"><button id="quitBtn" class="ghost">처음 화면</button><span id="saveState" class="save-state">자동 저장</span></div>
     </section>
   </main>
 
-  <main id="screen-result" class="screen"><section class="result-shell card">
-    <div class="result-mascots" aria-hidden="true"><span>૮ ˶ᵔ ᵕ ᵔ˶ ა</span><span>ʕ•ᴥ•ʔ</span></div><div class="confetti">✨</div><h1>인권지도가 완성되었습니다!</h1><p>완성된 인권지도의 핵심어를 학습지에 옮겨 적어 봅시다.</p>
-    <div class="final-map">
-      <div class="final-zone"><h3>자유롭게 살 권리</h3><p>표현 · 종교·양심 · 사생활 · 모임·단체 · 정치 참여</p></div>
-      <div class="final-zone"><h3>차별받지 않고 안전하게 살 권리</h3><p>차별금지 · 생명·안전 · 자의적 구금 금지 · 고문 금지 · 법 앞의 평등</p></div>
-      <div class="final-zone"><h3>인간답게 생활할 권리</h3><p>교육 · 노동 · 휴식 · 사회보장·도움 · 건강·주거 · 문화</p></div>
-      <div class="final-zone"><h3>함께 살아가기 위한 권리</h3><p>환경 · 평화 · 재난·위기 지원 · 국제적 연대·협력</p></div>
-    </div>
-    <p class="micro">※ 이 인권지도는 다양한 인권을 쉽게 이해하기 위해 수업에서 재구성한 것입니다.</p>
-    <button id="finishBtn" class="primary xl">수업 마치기</button>
-  </section></main>
+  <main id="screen-world" class="screen">
+    <section class="world-shell">
+      <div class="world-head">
+        <div>
+          <div id="studentBadge" class="student-badge"></div>
+          <h1>인권마을 지도</h1>
+          <p>가고 싶은 마을부터 탐험해도 좋아요. 사건을 해결할 때마다 배지가 하나씩 생겨요!</p>
+        </div>
+        <div class="badge-counter"><span>내 배지</span><strong id="worldCount">0/20</strong></div>
+      </div>
 
-  <main id="screen-preview" class="screen"><section class="preview-shell card">
-    <div class="eyebrow">다음 미션</div><h1>인권 생존게임</h1>
-    <p class="lead">오늘 배운 권리들은 실제 생활에서도 누구에게나 모두 똑같이 보장되고 있을까요?</p>
-    <div class="preview-card"><strong>서로 다른 조건에서 서울에서 일주일 살아남기</strong><span>다음 수업에서 계속됩니다.</span></div>
-    <button id="previewCloseBtn" class="primary">확인</button>
-  </section></main>
+      <div class="world-map">
+        <img src="./village-map.jpg" alt="" class="world-bg">
+        <div class="map-dim"></div>
+        <button class="village-card freedom" data-zone="freedom">
+          <span class="village-icon">🕊️</span><strong>자유마을</strong><small>자유롭게 살 권리</small><em id="world-freedom">0/5</em>
+        </button>
+        <button class="village-card safe" data-zone="safe">
+          <span class="village-icon">🛡️</span><strong>안전마을</strong><small>차별받지 않고 안전하게</small><em id="world-safe">0/5</em>
+        </button>
+        <button class="village-card dignity" data-zone="dignity">
+          <span class="village-icon">🏠</span><strong>생활마을</strong><small>인간답게 생활할 권리</small><em id="world-dignity">0/6</em>
+        </button>
+        <button class="village-card together" data-zone="together">
+          <span class="village-icon">🌏</span><strong>세계마을</strong><small>함께 살아가기 위한 권리</small><em id="world-together">0/4</em>
+        </button>
+        <div class="map-mascot">૮₍ ˃ ⤙ ˂ ₎ა<span>어디부터 갈까?</span></div>
+      </div>
 
-  <main id="screen-done" class="screen"><section class="done-shell card"><h1>오늘의 인권지도 만들기 완료!</h1><p>학습지에 인권지도의 핵심어를 모두 정리했는지 확인해 봅시다.</p><button id="doneHomeBtn" class="primary">처음 화면으로</button></section></main>
-
-  <div id="modal" class="modal hidden" aria-hidden="true"><div class="modal-card"><button id="modalClose" class="icon-btn" aria-label="닫기">×</button><div id="modalContent"></div></div></div>
-
-  <main id="screen-admin" class="screen admin-screen"><section class="admin-shell">
-    <div class="admin-head"><div><div class="eyebrow">교사용</div><h1>인권지도 관리자</h1></div><div class="admin-actions"><button id="adminPreviewBtn" class="ghost">학생 화면 미리보기</button><button id="adminLogoutBtn" class="ghost">로그아웃</button></div></div>
-    <nav class="admin-tabs"><button class="tab active" data-admin-tab="manage">게임 관리</button><button class="tab" data-admin-tab="students">학생 현황</button><button class="tab" data-admin-tab="questions">문제 수정</button><button class="tab" data-admin-tab="messages">문구 수정</button><button class="tab" data-admin-tab="stats">결과 보기</button></nav>
-
-    <section id="admin-manage" class="admin-panel active">
-      <div class="status-cards"><div class="status-card"><span>현재 상태</span><strong id="gameStatusText">진행 중</strong></div><div class="status-card"><span>참여</span><strong id="statJoined">0</strong></div><div class="status-card"><span>완료</span><strong id="statDone">0</strong></div><div class="status-card"><span>진행 중</span><strong id="statDoing">0</strong></div></div>
-      <div class="admin-card"><h3>게임 열기/마감</h3><div class="row-actions"><button id="openGameBtn" class="primary">게임 열기</button><button id="closeGameBtn" class="danger-btn">게임 마감</button><button id="reopenGameBtn" class="ghost">마감 취소</button></div><label class="switch-row"><input id="forceStopToggle" type="checkbox"><span>마감 시 진행 중인 학생도 즉시 중단</span></label></div>
-      <div class="admin-card"><h3>다음 수업 예고 화면</h3><label class="switch-row big"><input id="previewToggle" type="checkbox"><span><strong id="previewStateText">사용 안 함</strong><small>학생이 수업 마치기를 눌렀을 때 다음 수업 예고를 보여줍니다.</small></span></label></div>
-      <div class="admin-card"><h3>관리자 번호 변경</h3><p class="micro">6자리 이상 숫자를 권장합니다.</p><div class="inline-form"><input id="currentAdminPin" type="password" inputmode="numeric" placeholder="현재 번호"><input id="newAdminPin" type="password" inputmode="numeric" placeholder="새 번호"><button id="changeAdminPinBtn" class="ghost">변경</button></div></div>
-      <div class="admin-card danger-zone"><h3>전체 기록 초기화</h3><p>새 수업을 시작할 때만 사용하세요.</p><button id="resetAllBtn" class="danger-btn">전체 학생 기록 삭제</button></div>
+      <div class="world-summary">
+        <div class="progress-track"><div id="worldBar" class="progress-bar"></div></div>
+        <span id="worldMessage">첫 번째 마을을 골라보자!</span>
+      </div>
+      <button id="worldHomeBtn" class="ghost">처음 화면</button>
     </section>
+  </main>
 
-    <section id="admin-students" class="admin-panel"><div class="admin-card"><div class="student-tools"><div id="classTabs" class="class-tabs"></div><input id="studentSearch" type="search" placeholder="번호 또는 이름 검색"><button id="downloadCsvBtn" class="ghost">CSV 다운로드</button></div><div class="table-wrap"><table><thead><tr><th>번호</th><th>이름</th><th>상태</th><th>진행률</th><th>첫 시도 정답</th><th>관리</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div></section>
-    <section id="admin-questions" class="admin-panel"><div class="admin-card"><div class="section-head"><div><h3>문제 수정</h3><p class="micro">상황, 선택지, 설명을 직접 수정할 수 있습니다.</p></div><button id="resetQuestionsBtn" class="ghost">기본값으로 되돌리기</button></div><div id="questionEditorList" class="editor-list"></div></div></section>
-    <section id="admin-messages" class="admin-panel"><div class="admin-card"><h3>첫 번째 오답 격려 문구</h3><div id="wrongMessageList" class="message-editor"></div><button id="addWrongMessageBtn" class="ghost">문구 추가</button></div><div class="admin-card"><h3>두 번째 오답 후 문구</h3><textarea id="secondWrongMessage" rows="3"></textarea></div><div class="admin-card"><h3>정답 격려 문구</h3><div id="correctMessageList" class="message-editor"></div><button id="addCorrectMessageBtn" class="ghost">문구 추가</button></div><button id="saveMessagesBtn" class="primary">문구 저장</button></section>
-    <section id="admin-stats" class="admin-panel"><div class="admin-card"><div class="section-head"><div><h3>가장 많이 헷갈린 인권</h3><p class="micro">첫 시도 오답률 기준입니다.</p></div><select id="statsClassSelect"></select></div><div id="confusionList" class="confusion-list"></div></div></section>
-  </section></main>
+  <main id="screen-village" class="screen">
+    <section class="village-shell">
+      <button id="backWorldBtn" class="ghost">← 인권마을 지도</button>
+      <div id="villageHeader" class="village-header"></div>
+      <div id="locationGrid" class="location-grid"></div>
+      <div class="village-tip"><span class="tip-mascot">ʕ•ᴥ•ʔ</span><span>장소를 눌러 사건을 해결해 보세요. 이미 해결한 곳은 배지가 보여요!</span></div>
+    </section>
+  </main>
+
+  <main id="screen-case" class="screen">
+    <section class="case-shell">
+      <button id="caseBackBtn" class="ghost">← 마을로 돌아가기</button>
+      <article class="case-card">
+        <div class="case-top">
+          <div id="caseLocation" class="case-location"></div>
+          <div id="caseCount" class="case-count"></div>
+        </div>
+        <div class="resident">
+          <div class="resident-face">૮ ˶• ﻌ •˶ ა</div>
+          <div class="resident-bubble">이 사건에는 어떤 인권이 필요할까?</div>
+        </div>
+        <div id="caseSituation" class="case-situation"></div>
+        <p class="choice-caption">가장 관련 있는 <strong>인권 배지</strong>를 골라주세요.</p>
+        <div id="caseOptions" class="badge-options"></div>
+        <div id="caseFeedback" class="feedback hidden"></div>
+        <button id="caseNextBtn" class="primary xl hidden">배지 받기 ✨</button>
+      </article>
+    </section>
+  </main>
+
+  <main id="screen-badge" class="screen">
+    <section class="badge-shell">
+      <div class="sparkles">✨ ⭐ ✨</div>
+      <div class="earned-badge"><div id="earnedEmoji" class="earned-emoji">🏅</div><span>새 인권 배지</span><strong id="earnedRight"></strong></div>
+      <p id="earnedExplanation"></p>
+      <div class="mascot-celebrate">૮ ˶ᵔ ᵕ ᵔ˶ ა <span>사건 해결!</span></div>
+      <div class="row-actions center">
+        <button id="nextPlaceBtn" class="primary">다음 장소로!</button>
+        <button id="badgeWorldBtn" class="ghost">다른 마을 가기</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-result" class="screen">
+    <section class="result-shell">
+      <div class="result-title">🎉 인권마을 탐험 완료!</div>
+      <p>인권 배지 20개를 모두 모았어요. 이제 나만의 인권지도를 확인해 봅시다.</p>
+      <div class="final-map">
+        <div><h3>🕊️ 자유롭게 살 권리</h3><p>표현 · 종교·양심 · 사생활 · 모임·단체 · 정치 참여</p></div>
+        <div><h3>🛡️ 차별받지 않고 안전하게 살 권리</h3><p>차별금지 · 생명·안전 · 자의적 구금 금지 · 고문 금지 · 법 앞의 평등</p></div>
+        <div><h3>🏠 인간답게 생활할 권리</h3><p>교육 · 노동 · 휴식 · 사회보장·도움 · 건강·주거 · 문화</p></div>
+        <div><h3>🌏 함께 살아가기 위한 권리</h3><p>환경 · 평화 · 재난·위기 지원 · 국제적 연대·협력</p></div>
+      </div>
+      <p class="worksheet-tip">✏️ 이 핵심어들을 학습지의 인권지도에 옮겨 적어보세요.</p>
+      <button id="finishBtn" class="primary xl">수업 마치기</button>
+    </section>
+  </main>
+
+  <main id="screen-preview" class="screen">
+    <section class="simple-shell">
+      <div class="eyebrow">다음 미션</div><h1>인권 생존게임</h1>
+      <p>오늘 배운 권리들은 실제 생활에서도 누구에게나 모두 똑같이 보장되고 있을까요?</p>
+      <div class="preview-card"><strong>서로 다른 조건에서 서울에서 일주일 살아남기</strong><span>다음 수업에서 계속됩니다.</span></div>
+      <button id="previewCloseBtn" class="primary">확인</button>
+    </section>
+  </main>
+
+  <main id="screen-done" class="screen">
+    <section class="simple-shell"><h1>오늘의 탐험 완료! 🌱</h1><p>학습지에 인권지도의 핵심어를 모두 정리했는지 확인해 봅시다.</p><button id="doneHomeBtn" class="primary">처음 화면으로</button></section>
+  </main>
+
+  <div id="modal" class="modal hidden"><div class="modal-card"><button id="modalClose" class="icon-btn">×</button><div id="modalContent"></div></div></div>
   <div id="toast" class="toast hidden"></div>
+
+  <main id="screen-admin" class="screen admin-screen">
+    <section class="admin-shell">
+      <div class="admin-head"><div><div class="eyebrow">교사용</div><h1>인권마을 관리자</h1></div><div class="row-actions"><button id="adminPreviewBtn" class="ghost">학생 화면</button><button id="adminLogoutBtn" class="ghost">로그아웃</button></div></div>
+      <nav class="admin-tabs">
+        <button class="tab active" data-tab="manage">게임 관리</button><button class="tab" data-tab="students">학생 현황</button><button class="tab" data-tab="questions">사건 수정</button><button class="tab" data-tab="messages">문구 수정</button><button class="tab" data-tab="stats">결과 보기</button>
+      </nav>
+
+      <section id="admin-manage" class="admin-panel active">
+        <div class="status-cards"><div><span>현재 상태</span><strong id="gameStatusText">진행 중</strong></div><div><span>참여</span><strong id="statJoined">0</strong></div><div><span>완료</span><strong id="statDone">0</strong></div><div><span>진행 중</span><strong id="statDoing">0</strong></div></div>
+        <div class="admin-card"><h3>게임 열기/마감</h3><div class="row-actions"><button id="openGameBtn" class="primary">게임 열기</button><button id="closeGameBtn" class="danger-btn">게임 마감</button><button id="reopenGameBtn" class="ghost">마감 취소</button></div><label class="switch-row"><input id="forceStopToggle" type="checkbox"> 마감 시 진행 중인 학생도 즉시 중단</label></div>
+        <div class="admin-card"><h3>다음 수업 예고</h3><label class="switch-row"><input id="previewToggle" type="checkbox"> <strong id="previewStateText">사용 안 함</strong></label></div>
+        <div class="admin-card"><h3>관리자 번호 변경</h3><div class="inline-form"><input id="currentAdminPin" type="password" inputmode="numeric" placeholder="현재 번호"><input id="newAdminPin" type="password" inputmode="numeric" placeholder="새 번호"><button id="changeAdminPinBtn" class="ghost">변경</button></div></div>
+        <div class="admin-card danger-zone"><h3>전체 기록 초기화</h3><button id="resetAllBtn" class="danger-btn">전체 학생 기록 삭제</button></div>
+      </section>
+
+      <section id="admin-students" class="admin-panel">
+        <div class="admin-card"><div class="student-tools"><div id="classTabs" class="class-tabs"></div><input id="studentSearch" type="search" placeholder="번호 또는 이름 검색"><button id="downloadCsvBtn" class="ghost">CSV 다운로드</button></div><div class="table-wrap"><table><thead><tr><th>번호</th><th>이름</th><th>상태</th><th>배지</th><th>첫 시도 정답</th><th>관리</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div>
+      </section>
+
+      <section id="admin-questions" class="admin-panel">
+        <div class="admin-card"><div class="section-head"><div><h3>사건 카드 수정</h3><p class="micro">장소·상황·정답·설명을 바로 수정할 수 있습니다.</p></div><button id="resetQuestionsBtn" class="ghost">기본값으로 되돌리기</button></div><div id="questionEditorList" class="editor-list"></div></div>
+      </section>
+
+      <section id="admin-messages" class="admin-panel">
+        <div class="admin-card"><h3>첫 오답 격려 문구</h3><div id="wrongMessageList" class="message-editor"></div><button id="addWrongMessageBtn" class="ghost">문구 추가</button></div>
+        <div class="admin-card"><h3>두 번째 오답 후 문구</h3><textarea id="secondWrongMessage" rows="3"></textarea></div>
+        <div class="admin-card"><h3>정답 문구</h3><div id="correctMessageList" class="message-editor"></div><button id="addCorrectMessageBtn" class="ghost">문구 추가</button></div>
+        <button id="saveMessagesBtn" class="primary">문구 저장</button>
+      </section>
+
+      <section id="admin-stats" class="admin-panel">
+        <div class="admin-card"><div class="section-head"><div><h3>가장 많이 헷갈린 인권</h3><p class="micro">첫 시도 오답률 기준</p></div><select id="statsClassSelect"></select></div><div id="confusionList" class="confusion-list"></div></div>
+      </section>
+    </section>
+  </main>
 </div>
 <script type="module" src="./app.js"></script>
 </body>
