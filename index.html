@@ -54,24 +54,44 @@
         <div class="badge-counter"><span>내 배지</span><strong id="worldCount">0/20</strong></div>
       </div>
 
-      <div class="world-map">
-        <img src="./village-map.jpg" alt="자유마을, 안전마을, 생활마을, 세계마을이 있는 인권마을 지도" class="world-bg">
-        <button class="village-card freedom" data-zone="freedom" aria-label="자유마을 들어가기">
-          <span class="map-hover-label">🕊️ 자유마을</span>
+      <div class="world-map clean-map">
+        <div class="sea-cloud cloud-a">☁️</div>
+        <div class="sea-cloud cloud-b">☁️</div>
+        <div class="tiny-boat">⛵</div>
+        <div class="map-center">
+          <div class="globe">🌍</div>
+          <span>인권광장</span>
+        </div>
+
+        <button class="village-island island-freedom" data-zone="freedom" aria-label="자유마을 들어가기">
+          <div class="island-ribbon">🕊️ 자유마을</div>
+          <div class="island-landmarks"><span>🏫</span><span>💬</span><span>🗳️</span></div>
+          <small>생각하고 표현하며 참여하는 마을</small>
           <em id="world-freedom">0/5</em>
         </button>
-        <button class="village-card safe" data-zone="safe" aria-label="안전마을 들어가기">
-          <span class="map-hover-label">🛡️ 안전마을</span>
+
+        <button class="village-island island-safe" data-zone="safe" aria-label="안전마을 들어가기">
+          <div class="island-ribbon">🛡️ 안전마을</div>
+          <div class="island-landmarks"><span>🏥</span><span>⚖️</span><span>🚓</span></div>
+          <small>차별 없이 안전하게 지내는 마을</small>
           <em id="world-safe">0/5</em>
         </button>
-        <button class="village-card dignity" data-zone="dignity" aria-label="생활마을 들어가기">
-          <span class="map-hover-label">🏠 생활마을</span>
+
+        <button class="village-island island-dignity" data-zone="dignity" aria-label="생활마을 들어가기">
+          <div class="island-ribbon">🏠 생활마을</div>
+          <div class="island-landmarks"><span>📚</span><span>🛌</span><span>🎨</span></div>
+          <small>배우고 쉬고 생활하는 마을</small>
           <em id="world-dignity">0/6</em>
         </button>
-        <button class="village-card together" data-zone="together" aria-label="세계마을 들어가기">
-          <span class="map-hover-label">🌏 세계마을</span>
+
+        <button class="village-island island-together" data-zone="together" aria-label="세계마을 들어가기">
+          <div class="island-ribbon">🌏 세계마을</div>
+          <div class="island-landmarks"><span>🌳</span><span>⛑️</span><span>🤝</span></div>
+          <small>세계와 함께 살아가는 마을</small>
           <em id="world-together">0/4</em>
         </button>
+
+        <div class="map-helper">૮ ˶ᵔ ᵕ ᵔ˶ ა <span>원하는 마을을 눌러봐!</span></div>
       </div>
 
       <div class="world-summary">

@@ -58,11 +58,11 @@ function enterWorld(){
 }
 function renderWorld(){
  const total=totalSolved();$("#worldCount").textContent=`${total}/20`;$("#worldBar").style.width=`${total/20*100}%`;renderTop();
- Object.keys(ZONES).forEach(z=>{const n=zoneSolved(z),t=ZONES[z].target;$(`#world-${z}`).textContent=`${n}/${t}`;document.querySelector(`.village-card[data-zone="${z}"]`).classList.toggle("complete",n===t)});
+ Object.keys(ZONES).forEach(z=>{const n=zoneSolved(z),t=ZONES[z].target;$(`#world-${z}`).textContent=`${n}/${t}`;(document.querySelector(`.village-island[data-zone="${z}"]`)||document.querySelector(`.village-card[data-zone="${z}"]`))?.classList.toggle("complete",n===t)});
  $("#worldMessage").textContent=total===0?"첫 번째 마을을 골라보자!":total<10?"배지가 차곡차곡 모이고 있어!":total<20?"절반 넘었어! 마지막까지 탐험해 보자!":"모든 배지를 모았어!";
  if(total===20&&!progress.completed)showResult();
 }
-$$(".village-card").forEach(b=>b.onclick=()=>openVillage(b.dataset.zone));
+$$(".village-card, .village-island").forEach(b=>b.onclick=()=>openVillage(b.dataset.zone));
 function openVillage(z){currentZone=z;progress.lastZone=z;renderVillage();show("#screen-village");save()}
 function zoneBg(z){return z==="freedom"?"#dff4ff":z==="safe"?"#ffe5eb":z==="dignity"?"#fff0c5":"#dff7ed"}
 function renderVillage(){

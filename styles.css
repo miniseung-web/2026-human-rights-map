@@ -137,3 +137,105 @@
   .village-card em{font-size:12px;padding:5px 9px}
   .map-hover-label{display:none}
 }
+
+
+/* ===== v3.2 CLEAN MAP: composite image removed completely ===== */
+.clean-map{
+  position:relative;
+  height:auto !important;
+  min-height:660px;
+  aspect-ratio:auto !important;
+  overflow:hidden;
+  border-radius:32px;
+  border:1px solid #cce8f3;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,255,255,.75) 0 3%, transparent 3.2%),
+    radial-gradient(circle at 83% 14%, rgba(255,255,255,.75) 0 2.6%, transparent 2.8%),
+    linear-gradient(180deg,#aee7ff 0%,#c7efff 38%,#8fdcf0 100%);
+  box-shadow:0 20px 55px rgba(49,96,128,.14);
+}
+.clean-map::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse at 18% 31%, rgba(255,255,255,.27), transparent 34%),
+    radial-gradient(ellipse at 80% 72%, rgba(255,255,255,.20), transparent 28%);
+  pointer-events:none;
+}
+.world-bg,.village-card,.map-dim,.map-mascot{display:none !important}
+
+.sea-cloud{position:absolute;font-size:58px;filter:drop-shadow(0 4px 0 rgba(255,255,255,.35));opacity:.92;z-index:1}
+.cloud-a{left:3%;top:3%}.cloud-b{right:3%;top:5%}.tiny-boat{position:absolute;right:4%;bottom:4%;font-size:38px;z-index:2}
+
+.map-center{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:118px;height:118px;border-radius:50%;
+  background:rgba(255,255,255,.94);border:6px solid rgba(255,255,255,.9);
+  box-shadow:0 12px 28px rgba(41,79,107,.18);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4
+}
+.map-center .globe{font-size:48px;line-height:1}.map-center span{font-family:"Jua";font-size:16px;margin-top:4px}
+
+.village-island{
+  position:absolute;width:36%;height:34%;
+  border:5px solid rgba(255,255,255,.95);
+  box-shadow:0 12px 0 rgba(55,82,70,.10),0 18px 35px rgba(43,83,110,.16);
+  padding:23px 18px 17px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#253044;transition:.18s ease;z-index:3;
+  overflow:visible;
+}
+.village-island::before{
+  content:"";position:absolute;left:8%;right:8%;bottom:-10px;height:25px;
+  background:rgba(211,184,116,.62);border-radius:50%;z-index:-1
+}
+.village-island:hover{transform:translateY(-5px) scale(1.02);filter:saturate(1.05)}
+.village-island:focus-visible{outline:5px solid rgba(255,255,255,.9);outline-offset:3px}
+
+.island-freedom{left:7%;top:7%;background:linear-gradient(145deg,#ccefff,#9fdcf5);border-radius:46% 54% 48% 52% / 57% 44% 56% 43%}
+.island-safe{right:7%;top:7%;background:linear-gradient(145deg,#ffdce4,#ffbfcf);border-radius:53% 47% 55% 45% / 45% 58% 42% 55%}
+.island-dignity{left:8%;bottom:7%;background:linear-gradient(145deg,#fff0b8,#ffd98b);border-radius:51% 49% 44% 56% / 56% 44% 57% 43%}
+.island-together{right:8%;bottom:7%;background:linear-gradient(145deg,#d5f5e8,#9ee2c8);border-radius:45% 55% 53% 47% / 44% 58% 42% 56%}
+
+.island-ribbon{
+  font-family:"Jua";font-size:30px;letter-spacing:-.02em;
+  background:#fff;border:3px solid rgba(255,255,255,.9);
+  padding:8px 18px;border-radius:999px;
+  box-shadow:0 5px 0 rgba(43,62,86,.09)
+}
+.island-landmarks{display:flex;gap:18px;font-size:36px;margin:13px 0 7px}
+.village-island small{font-weight:700;color:#566174;font-size:13px}
+.village-island em{
+  position:absolute;right:13px;top:13px;
+  font-style:normal;font-family:"Jua";font-size:18px;
+  background:#fff;padding:7px 12px;border-radius:999px;
+  box-shadow:0 5px 12px rgba(47,70,90,.12)
+}
+.village-island.complete::after{
+  content:"✓ 마을 완료";position:absolute;left:14px;top:13px;
+  background:#ff7088;color:#fff;border:3px solid #fff;
+  border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900
+}
+.map-helper{
+  position:absolute;left:50%;bottom:3%;transform:translateX(-50%);
+  z-index:5;background:#fff;border-radius:999px;padding:10px 18px;
+  font-family:"Jua";font-size:18px;box-shadow:0 8px 20px rgba(40,75,100,.14)
+}
+.map-helper span{font-family:"Noto Sans KR";font-size:12px;margin-left:7px;color:#667080}
+
+@media(max-width:850px){
+  .clean-map{min-height:760px}
+  .village-island{width:42%;height:31%;padding:18px 10px}
+  .island-freedom{left:4%;top:8%}.island-safe{right:4%;top:8%}
+  .island-dignity{left:4%;bottom:8%}.island-together{right:4%;bottom:8%}
+  .island-ribbon{font-size:24px}.island-landmarks{font-size:30px;gap:12px}
+  .map-center{width:96px;height:96px}.map-center .globe{font-size:38px}.map-center span{font-size:14px}
+}
+@media(max-width:560px){
+  .clean-map{min-height:820px}
+  .village-island{width:86%;height:20%;left:7%!important;right:auto!important}
+  .island-freedom{top:4%;bottom:auto}.island-safe{top:27%;bottom:auto}
+  .island-dignity{top:50%;bottom:auto}.island-together{top:73%;bottom:auto}
+  .map-center,.map-helper,.sea-cloud,.tiny-boat{display:none}
+  .island-ribbon{font-size:23px}.island-landmarks{font-size:27px;margin:8px 0 4px}
+}
