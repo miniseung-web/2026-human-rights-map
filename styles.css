@@ -14,3 +14,126 @@
 .admin-screen{background:#f5f7fa}.admin-head,.section-head,.student-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.admin-tabs{display:flex;gap:7px;overflow:auto;margin:18px 0}.tab{border:1px solid var(--line);background:#fff;padding:10px 13px;border-radius:10px;font-weight:800}.tab.active{background:#293044;color:#fff}.admin-panel{display:none}.admin-panel.active{display:block}.status-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.status-cards>div,.admin-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px;margin-bottom:13px}.status-cards span{font-size:12px;color:var(--muted)}.status-cards strong{display:block;font-size:25px}.switch-row{display:flex;align-items:center;gap:8px}.switch-row input{width:auto;margin:0}.inline-form{display:flex;gap:8px;flex-wrap:wrap}.inline-form input{width:auto;flex:1}.danger-zone{border-color:#ffd0d0}.class-tabs{display:flex;gap:5px;flex-wrap:wrap}.class-tabs button{border:1px solid var(--line);background:#f7f8fb;border-radius:9px;padding:7px 9px}.class-tabs button.active{background:#5274d5;color:#fff}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{font-size:13px;text-align:left;padding:10px;border-bottom:1px solid var(--line)}.editor-list,.message-editor,.confusion-list{display:flex;flex-direction:column;gap:9px}.editor-item{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fbfcfe}.editor-item summary{font-weight:800;cursor:pointer}.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.editor-grid .span-2{grid-column:span 2}.message-row{display:flex;gap:7px}.message-row input{margin:0}.confusion-row{display:grid;grid-template-columns:35px 1fr 80px;gap:10px;background:#f7f8fb;padding:11px;border-radius:11px}.rank{font-weight:900;color:#5274d5}
 @media(max-width:850px){.home-card{grid-template-columns:1fr;margin:15px}.hero-visual{min-height:280px}.fluffy{font-size:32px;padding:30px 20px 25px}.home-content{padding:25px}.world-map{height:720px}.village-card{width:44%}.freedom{left:3%;top:12%}.safe{right:3%;top:12%}.dignity{left:3%;bottom:9%}.together{right:3%;bottom:9%}.location-grid{grid-template-columns:1fr 1fr}.badge-options{grid-template-columns:1fr}.status-cards{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.brand{font-size:11px}.brand strong{font-size:16px}.home-content h1{font-size:40px}.form-grid{grid-template-columns:1fr}.span-2{grid-column:span 1}.world-head{align-items:flex-start;flex-direction:column}.world-map{height:680px}.village-card{width:46%;padding:10px 7px}.village-card strong{font-size:22px}.village-card small{font-size:10px}.village-card .village-icon{font-size:29px}.map-mascot{font-size:18px}.location-grid{grid-template-columns:1fr}.case-card{padding:18px}.case-situation{font-size:18px}.final-map{grid-template-columns:1fr}.badge-shell,.result-shell,.simple-shell{margin:15px;padding:24px}.editor-grid{grid-template-columns:1fr}.editor-grid .span-2{grid-column:span 1}}
+
+
+/* ===== v3.1 지도 화면: 지도 그 자체가 UI ===== */
+.world-map{
+  height:auto !important;
+  aspect-ratio:16/9;
+  background:#d5f1fb;
+  overflow:hidden;
+  position:relative;
+  border-radius:30px;
+  border:1px solid #c9e4ef;
+  box-shadow:0 20px 55px rgba(50,90,130,.13);
+}
+.world-bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain !important;
+  object-position:center;
+  background:#d5f1fb;
+}
+.map-dim,.map-mascot{display:none !important}
+
+/* 클릭 영역은 투명하게, 진행률만 보이게 */
+.village-card{
+  position:absolute;
+  width:32%;
+  height:33%;
+  padding:0;
+  border:0;
+  background:transparent !important;
+  box-shadow:none !important;
+  border-radius:28px;
+  display:block;
+  transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  z-index:3;
+}
+.village-card:hover,
+.village-card:focus-visible{
+  transform:scale(1.025);
+  background:rgba(255,255,255,.10) !important;
+  box-shadow:0 0 0 4px rgba(255,255,255,.72),0 10px 28px rgba(40,70,110,.12) !important;
+  outline:none;
+}
+.village-card .village-icon,
+.village-card strong,
+.village-card small{display:none !important}
+
+.village-card em{
+  position:absolute;
+  top:10px;
+  right:12px;
+  font-style:normal;
+  background:rgba(255,255,255,.96);
+  color:#293044;
+  border:2px solid rgba(255,255,255,.9);
+  border-radius:999px;
+  padding:7px 12px;
+  font-weight:900;
+  font-size:14px;
+  box-shadow:0 5px 15px rgba(33,58,91,.14);
+}
+.map-hover-label{
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  transform:translateX(-50%) translateY(6px);
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  background:rgba(255,255,255,.96);
+  border-radius:999px;
+  padding:7px 12px;
+  font-family:"Jua";
+  font-size:18px;
+  color:#293044;
+  box-shadow:0 6px 18px rgba(35,60,90,.14);
+  transition:.18s ease;
+}
+.village-card:hover .map-hover-label,
+.village-card:focus-visible .map-hover-label{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.village-card.complete:after{
+  content:"✓ 완료";
+  position:absolute;
+  left:12px;
+  top:10px;
+  right:auto;
+  background:#ff7e91;
+  color:white;
+  border:3px solid white;
+  border-radius:999px;
+  padding:5px 10px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 5px 14px rgba(70,40,50,.15);
+}
+
+/* 지도 이미지 안의 실제 섬 위치와 맞춘 클릭 영역 */
+.village-card.freedom{left:5%;top:8%}
+.village-card.safe{right:5%;top:8%}
+.village-card.dignity{left:9%;bottom:7%}
+.village-card.together{right:8%;bottom:7%}
+
+.world-head{margin-bottom:14px}
+.world-summary{margin-top:14px}
+
+@media(max-width:850px){
+  .world-map{aspect-ratio:4/3}
+  .village-card{width:42%;height:34%}
+  .village-card.freedom{left:3%;top:7%}
+  .village-card.safe{right:3%;top:7%}
+  .village-card.dignity{left:4%;bottom:6%}
+  .village-card.together{right:4%;bottom:6%}
+}
+@media(max-width:560px){
+  .world-map{aspect-ratio:3/4}
+  .world-bg{object-fit:contain !important}
+  .village-card{width:45%;height:31%}
+  .village-card em{font-size:12px;padding:5px 9px}
+  .map-hover-label{display:none}
+}
