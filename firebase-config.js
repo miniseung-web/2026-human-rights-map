@@ -1,11 +1,10 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyBRs8-5WO_Km5HxDysCGr_FkySfTatxLks",
-  authDomain: "human-rights-map-f9a20.firebaseapp.com",
-  projectId: "human-rights-map-f9a20",
-  storageBucket: "human-rights-map-f9a20.firebasestorage.app",
-  messagingSenderId: "594183436362",
-  appId: "1:594183436362:web:acf5a0f7654f000df40eb3",
-  measurementId: "G-SWG6765ZVY"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.firebasestorage.app",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 // Firebase Authentication에서 아래 이메일 계정을 1개 만들고,
