@@ -1,10 +1,10 @@
-export const CONTENT_VERSION = "2026-08-26-v2";
+export const CONTENT_VERSION = "2026-08-26-v2.2-war-safe";
 
 export const ZONES = {
   freedom: { label: "자유롭게 살 권리", target: 5, short: ["표현","종교·양심","사생활","모임·단체","정치 참여"] },
-  safe: { label: "차별받지 않고 안전하게 살 권리", target: 5, short: ["차별금지","생명·안전","자의적 구금 금지","고문 금지","법 앞의 평등"] },
+  safe: { label: "차별받지 않고 안전하게 살 권리", target: 6, short: ["차별금지","생명·안전","자의적 구금 금지","고문 금지","법 앞의 평등","평화·안전"] },
   dignity: { label: "인간답게 생활할 권리", target: 6, short: ["교육","노동","휴식","사회보장·도움","건강·주거","문화"] },
-  together: { label: "함께 살아가기 위한 권리", target: 4, short: ["환경","평화","재난·위기 지원","국제적 연대·협력"] }
+  together: { label: "함께 살아가기 위한 권리", target: 3, short: ["환경","재난·위기 지원","국제적 연대·협력"] }
 };
 
 export const DEFAULT_MESSAGES = {
@@ -39,7 +39,7 @@ export const DEFAULT_QUESTIONS = [
   {id:"q16",difficulty:"normal",zone:"dignity",right:"문화생활에 참여할 권리",situation:"수진이는 공연과 전시를 보고 싶지만, 사는 지역에는 이용할 수 있는 도서관이나 문화시설이 거의 없고 교통도 불편해 문화생활에 참여하기가 매우 어렵다.",wrong:["표현의 자유","사회보장과 필요한 도움을 받을 권리","정치에 참여할 권리"],explanation:"누구나 문화와 예술을 즐기고 문화생활에 참여할 기회를 누릴 수 있어야 해요."},
 
   {id:"q17",difficulty:"easy",zone:"together",right:"깨끗하고 건강한 환경에서 살 권리",situation:"공장이 폐수를 계속 흘려보내 주민들이 오염된 물을 마시고 심하게 오염된 공기 속에서 생활하게 되었다.",wrong:["표현의 자유","휴식할 권리","사생활을 보호받을 권리"],explanation:"사람은 건강하고 쾌적한 환경에서 살아갈 수 있어야 해요."},
-  {id:"q18",difficulty:"easy",zone:"together",right:"평화롭게 살아갈 권리",situation:"전쟁이 계속되면서 주민들은 언제 폭격을 당할지 몰라 매일 두려움 속에서 생활하고 있다.",wrong:["표현의 자유","일하고 정당한 대우를 받을 권리","사생활을 보호받을 권리"],explanation:"전쟁과 폭력의 위협 없이 평화로운 환경에서 살아가는 것도 중요해요."},
+  {id:"q18",difficulty:"easy",zone:"safe",right:"평화롭게 살아갈 권리",situation:"전쟁이 계속되면서 주민들은 언제 폭격을 당할지 몰라 매일 두려움 속에서 생활하고 있다.",wrong:["표현의 자유","일하고 정당한 대우를 받을 권리","사생활을 보호받을 권리"],explanation:"전쟁과 폭력의 위협 없이 생명과 안전을 보호받으며 살아갈 수 있어야 해요."},
   {id:"q19",difficulty:"normal",zone:"together",right:"재난과 위기에서 도움을 받을 권리",situation:"큰 지진이 발생해 많은 사람들이 집을 잃고 다쳤다. 피해를 입은 사람들은 안전한 대피 장소와 식량, 의약품, 구조 지원이 꼭 필요한 상황이다.",wrong:["표현의 자유","문화생활에 참여할 권리","정치에 참여할 권리"],explanation:"재난이나 큰 위기가 닥쳤을 때 누구나 필요한 구조와 도움을 받을 수 있어야 해요."},
   {id:"q20",difficulty:"hard",zone:"together",right:"국제적 연대와 협력을 통해 인권을 보장받을 권리",situation:"전쟁과 기근으로 어려움을 겪는 나라에 여러 나라와 국제기구가 식량, 의료, 교육 지원을 함께 제공했다.",wrong:["사생활을 보호받을 권리","휴식할 권리","법 앞에서 평등하게 보호받을 권리"],explanation:"어떤 인권 문제는 한 나라만의 힘으로 해결하기 어려워서, 세계 여러 나라가 함께 협력해야 해요."}
 ];
