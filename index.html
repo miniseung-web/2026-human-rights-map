@@ -64,8 +64,38 @@
     </section>
   </main>
 
-  <main id="screen-result" class="screen"><section class="result-shell card">
-    <div class="result-mascots" aria-hidden="true"><span>૮ ˶ᵔ ᵕ ᵔ˶ ა</span><span>ʕ•ᴥ•ʔ</span></div><div class="confetti">✨</div><h1>인권지도가 완성되었습니다!</h1><p>완성된 인권지도의 핵심어를 학습지에 옮겨 적어 봅시다.</p>
+  
+  <main id="screen-celebrate" class="screen">
+    <section class="reward-shell card">
+      <div class="reward-kicker">20개 모두 완료! 🎉</div>
+      <h1>고생 끝에 낙이 온다!</h1>
+      <img class="reward-meme completion-meme" src="./assets/completion_meme.png" alt="고생 끝에 낙이 온다">
+      <p class="reward-copy">인권지도 20개를 끝까지 완성했어요.<br>이제 마지막 <strong>행운의 뽑기</strong>에 도전해 볼까요?</p>
+      <button id="goLuckyBtn" class="lucky-button xl">🍀 행운의 뽑기</button>
+    </section>
+  </main>
+
+  <main id="screen-lucky" class="screen">
+    <section class="reward-shell card lucky-shell">
+      <div class="clover-mark">🍀</div>
+      <h1>행운의 뽑기</h1>
+      <p id="luckyIntro" class="reward-copy">기회는 딱 한 번!<br>행운이 찾아올까요?</p>
+
+      <div id="drawReady">
+        <button id="drawLuckyBtn" class="lucky-button xl">🍀 뽑기!</button>
+      </div>
+
+      <div id="drawResult" class="hidden">
+        <img id="drawResultImage" class="reward-meme draw-meme" src="" alt="">
+        <h2 id="drawResultTitle"></h2>
+        <p id="drawResultText" class="reward-copy"></p>
+        <button id="viewMapBtn" class="primary xl">인권지도 확인하기 →</button>
+      </div>
+    </section>
+  </main>
+
+<main id="screen-result" class="screen"><section class="result-shell card">
+    <div class="result-mascots" aria-hidden="true"><span>૮ ˶ᵔ ᵕ ᵔ˶ ა</span><span>ʕ•ᴥ•ʔ</span></div><div class="confetti">✨</div><h1>나의 인권지도</h1><p>아래 핵심어를 학습지의 4분할 인권지도에 옮겨 적어 봅시다.</p>
     <div class="final-map">
       <div class="final-zone"><h3>자유롭게 살 권리</h3><p>표현 · 종교·양심 · 사생활 · 모임·단체 · 정치 참여</p></div>
       <div class="final-zone"><h3>차별받지 않고 안전하게 살 권리</h3><p>차별금지 · 생명·안전 · 자의적 구금 금지 · 고문 금지 · 법 앞의 평등 · 평화·안전</p></div>
@@ -99,7 +129,7 @@
       <div class="admin-card danger-zone"><h3>전체 기록 초기화</h3><p>새 수업을 시작할 때만 사용하세요.</p><button id="resetAllBtn" class="danger-btn">전체 학생 기록 삭제</button></div>
     </section>
 
-    <section id="admin-students" class="admin-panel"><div class="admin-card"><div class="student-tools"><div id="classTabs" class="class-tabs"></div><input id="studentSearch" type="search" placeholder="번호 또는 이름 검색"><button id="downloadCsvBtn" class="ghost">CSV 다운로드</button></div><div class="table-wrap"><table><thead><tr><th>번호</th><th>이름</th><th>상태</th><th>진행률</th><th>첫 시도 정답</th><th>관리</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div></section>
+    <section id="admin-students" class="admin-panel"><div class="admin-card"><div class="student-tools"><div id="classTabs" class="class-tabs"></div><input id="studentSearch" type="search" placeholder="번호 또는 이름 검색"><button id="downloadCsvBtn" class="ghost">CSV 다운로드</button></div><div class="table-wrap"><table><thead><tr><th>번호</th><th>이름</th><th>상태</th><th>진행률</th><th>첫 시도 정답</th><th>행운의 뽑기</th><th>관리</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div></section>
     <section id="admin-questions" class="admin-panel"><div class="admin-card"><div class="section-head"><div><h3>문제 수정</h3><p class="micro">상황, 선택지, 설명을 직접 수정할 수 있습니다.</p></div><button id="resetQuestionsBtn" class="ghost">기본값으로 되돌리기</button></div><div id="questionEditorList" class="editor-list"></div></div></section>
     <section id="admin-messages" class="admin-panel"><div class="admin-card"><h3>첫 번째 오답 격려 문구</h3><div id="wrongMessageList" class="message-editor"></div><button id="addWrongMessageBtn" class="ghost">문구 추가</button></div><div class="admin-card"><h3>두 번째 오답 후 문구</h3><textarea id="secondWrongMessage" rows="3"></textarea></div><div class="admin-card"><h3>정답 격려 문구</h3><div id="correctMessageList" class="message-editor"></div><button id="addCorrectMessageBtn" class="ghost">문구 추가</button></div><button id="saveMessagesBtn" class="primary">문구 저장</button></section>
     <section id="admin-stats" class="admin-panel"><div class="admin-card"><div class="section-head"><div><h3>가장 많이 헷갈린 인권</h3><p class="micro">첫 시도 오답률 기준입니다.</p></div><select id="statsClassSelect"></select></div><div id="confusionList" class="confusion-list"></div></div></section>

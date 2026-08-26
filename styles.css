@@ -24,3 +24,69 @@ body{background:radial-gradient(circle at 10% 8%,#eefbdc 0 13%,transparent 31%),
 
 .teacher-tag{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;margin-bottom:8px;border-radius:999px;background:#fff6d9;border:1px solid #f0dfaa;color:#5f5140;font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(82,64,33,.06)}
 .teacher-tag strong{color:#4f6fbf;font-weight:900;letter-spacing:-.02em}
+
+
+/* ===== v2.3 완료 보상 / 행운의 뽑기 ===== */
+.reward-shell{
+  max-width:760px;
+  margin:5vh auto;
+  padding:38px;
+  text-align:center;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:28px;
+  box-shadow:0 18px 50px rgba(35,54,90,.10);
+}
+.reward-kicker{
+  display:inline-block;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#eef7ff;
+  color:#4564b5;
+  font-weight:800;
+  font-size:13px;
+}
+.reward-shell h1{margin:12px 0 18px}
+.reward-meme{
+  display:block;
+  max-width:100%;
+  width:auto;
+  margin:0 auto 20px;
+  border-radius:20px;
+  box-shadow:0 12px 28px rgba(35,50,80,.13);
+  object-fit:contain;
+}
+.completion-meme{max-height:380px}
+.draw-meme{max-height:360px}
+.reward-copy{color:#5d6777;line-height:1.7;font-size:16px}
+.lucky-shell{background:linear-gradient(180deg,#fbfff5,#fff)}
+.clover-mark{font-size:64px;filter:drop-shadow(0 7px 10px rgba(64,120,61,.16))}
+.lucky-button{
+  border:0;
+  border-radius:18px;
+  padding:15px 20px;
+  font-weight:900;
+  font-size:18px;
+  color:#fff;
+  background:linear-gradient(180deg,#56b96d,#3c9952);
+  box-shadow:0 6px 0 #2b783d;
+  cursor:pointer;
+}
+.lucky-button:active{transform:translateY(3px);box-shadow:0 3px 0 #2b783d}
+#drawResultTitle{font-size:34px;margin:8px 0}
+.wrong-disabled{
+  opacity:.38!important;
+  text-decoration:line-through;
+  cursor:not-allowed!important;
+  background:#f2f2f2!important;
+}
+.zone-wrong-disabled{
+  opacity:.4!important;
+  filter:grayscale(.7);
+  cursor:not-allowed!important;
+}
+.zone:disabled{pointer-events:none}
+@media(max-width:640px){
+  .reward-shell{margin:16px 12px;padding:24px}
+  .completion-meme,.draw-meme{max-height:300px}
+}
