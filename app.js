@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, deleteDoc, onSnapshot, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, deleteDoc, onSnapshot, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
 import { DEFAULT_QUESTIONS, DEFAULT_MESSAGES, ZONES, CONTENT_VERSION } from "./questions.js";
 
@@ -18,7 +18,20 @@ let settings={gameOpen:true,forceStop:false,previewEnabled:false,messages:struct
 let questions=structuredClone(DEFAULT_QUESTIONS);
 let currentStudent=null,currentProgress=null,orderedQuestions=[],currentQuestion=null;
 let answerAttempt=0,zoneAttempt=0,selectedAdminClass=1,studentCache=[];
-const PRIZE_PROBABILITY = 3/28; // 한 반 28명 기준 평균 약 3명 당첨
+// 반별 행운의 뽑기: 단순 확률이 아니라 남은 자리/당첨권을 계산해
+// 해당 반 학생들이 모두 참여하면 정확히 아래 인원만큼 당첨되도록 합니다.
+// 명렬표의 일반 수업 참여 인원(괄호 안 인원)을 기준으로 설정:
+// 1반 26명→3명, 2반 26명→3명, 3반 25명→3명,
+// 4반 27명→4명, 5반 27명→4명, 6반 25명→3명, 7반 27명→4명
+const CLASS_LOTTERY = {
+  1:{total:26,winners:3},
+  2:{total:26,winners:3},
+  3:{total:25,winners:3},
+  4:{total:27,winners:4},
+  5:{total:27,winners:4},
+  6:{total:25,winners:3},
+  7:{total:27,winners:4}
+};
 const STEP1_HINTS = [
   "힌트: 상황에서 ‘무엇을 하지 못했는지’ 또는 ‘무엇을 침해당했는지’를 찾아보세요.",
   "힌트: 가장 직접적으로 영향을 받은 권리를 고르면 돼요.",
@@ -167,6 +180,86 @@ function secureRandom(){
   }
   return Math.random();
 }
+async function drawWithClassQuota(){
+  const cls=currentStudent.cls;
+  const rule=CLASS_LOTTERY[cls]||{total:28,winners:4};
+  const studentRef=doc(db,"students",currentStudent.id);
+  // 별도 컬렉션을 추가하지 않고 학생 컬렉션 안의 숨김 문서에
+  // 반별 뽑기 진행 수/당첨 수만 기록합니다.
+  const lotteryRef=doc(db,"students",`__lottery_${cls}`);
+
+  return await runTransaction(db,async(tx)=>{
+    const studentSnap=await tx.get(studentRef);
+    if(!studentSnap.exists()) throw new Error("학생 기록을 찾을 수 없습니다.");
+
+    const remote=studentSnap.data();
+    const already=remote.progress?.prizeDraw;
+    if(already?.done){
+      currentProgress=remote.progress;
+      return already.won;
+    }
+
+    const lotterySnap=await tx.get(lotteryRef);
+    const state=lotterySnap.exists()?lotterySnap.data():{};
+    const drawCount=Math.max(0,Number(state.drawCount)||0);
+    const winCount=Math.max(0,Number(state.winCount)||0);
+
+    const remainingStudents=Math.max(1,rule.total-drawCount);
+    const remainingWins=Math.max(0,rule.winners-winCount);
+
+    // 남은 당첨권 / 남은 학생 수로 매번 확률을 자동 조정합니다.
+    // 마지막 학생들까지 가면 필요한 만큼 자동으로 당첨되어 최종 정원이 맞습니다.
+    let won=false;
+    if(remainingWins>0){
+      if(remainingWins>=remainingStudents) won=true;
+      else won=secureRandom()<(remainingWins/remainingStudents);
+    }
+
+    const prizeDraw={done:true,won,drawnAt:nowISO(),quotaVersion:"class-v1"};
+    const newProgress={...(remote.progress||currentProgress),prizeDraw};
+
+    tx.update(studentRef,{
+      progress:newProgress,
+      status:newProgress.completed?"done":"doing",
+      updatedAt:serverTimestamp()
+    });
+    tx.set(lotteryRef,{
+      lotteryMeta:true,
+      cls,
+      total:rule.total,
+      targetWins:rule.winners,
+      drawCount:drawCount+1,
+      winCount:winCount+(won?1:0),
+      updatedAt:serverTimestamp()
+    },{merge:true});
+
+    currentProgress=newProgress;
+    return won;
+  });
+}
+
+async function resetStudentRecord(id){
+  const sref=doc(db,"students",id);
+  await runTransaction(db,async(tx)=>{
+    const ss=await tx.get(sref);
+    if(!ss.exists()) return;
+    const d=ss.data();
+    const pd=d.progress?.prizeDraw;
+    if(pd?.done&&d.cls){
+      const lref=doc(db,"students",`__lottery_${d.cls}`);
+      const ls=await tx.get(lref);
+      if(ls.exists()){
+        const st=ls.data();
+        tx.set(lref,{
+          drawCount:Math.max(0,(Number(st.drawCount)||0)-1),
+          winCount:Math.max(0,(Number(st.winCount)||0)-(pd.won?1:0)),
+          updatedAt:serverTimestamp()
+        },{merge:true});
+      }
+    }
+    tx.delete(sref);
+  });
+}
 function renderLuckyResult(won){
   $("#drawReady").classList.add("hidden");
   $("#drawResult").classList.remove("hidden");
@@ -196,10 +289,18 @@ $("#goLuckyBtn").onclick=()=>{
 };
 $("#drawLuckyBtn").onclick=async()=>{
   if(currentProgress?.prizeDraw?.done){renderLuckyResult(currentProgress.prizeDraw.won);return;}
-  const won=secureRandom()<PRIZE_PROBABILITY;
-  currentProgress.prizeDraw={done:true,won,drawnAt:nowISO()};
-  await saveProgress();
-  renderLuckyResult(won);
+  $("#drawLuckyBtn").disabled=true;
+  $("#drawLuckyBtn").textContent="🍀 뽑는 중…";
+  try{
+    const won=await drawWithClassQuota();
+    renderLuckyResult(won);
+  }catch(e){
+    console.error(e);
+    toast("뽑기 저장에 실패했어요. 잠시 후 다시 눌러 주세요.");
+  }finally{
+    $("#drawLuckyBtn").disabled=false;
+    $("#drawLuckyBtn").textContent="🍀 뽑기!";
+  }
 };
 $("#viewMapBtn").onclick=()=>showScreen("#screen-result");
 $("#finishBtn").onclick=()=>settings.previewEnabled?showScreen("#screen-preview"):showScreen("#screen-done");
@@ -217,9 +318,9 @@ async function saveSettingsPatch(p){settings={...settings,...p};await setDoc(doc
 $("#openGameBtn").onclick=()=>saveSettingsPatch({gameOpen:true});$("#closeGameBtn").onclick=()=>confirm("게임을 마감할까요?")&&saveSettingsPatch({gameOpen:false,forceStop:$("#forceStopToggle").checked});$("#reopenGameBtn").onclick=()=>saveSettingsPatch({gameOpen:true});$("#forceStopToggle").onchange=()=>saveSettingsPatch({forceStop:$("#forceStopToggle").checked});$("#previewToggle").onchange=()=>saveSettingsPatch({previewEnabled:$("#previewToggle").checked});
 $("#changeAdminPinBtn").onclick=async()=>{const old=$("#currentAdminPin").value.trim(),nw=$("#newAdminPin").value.trim();if(!/^\d{6,}$/.test(nw))return toast("새 관리자 번호는 숫자 6자리 이상으로 해 주세요.");try{await reauthenticateWithCredential(auth.currentUser,EmailAuthProvider.credential(ADMIN_EMAIL,old));await updatePassword(auth.currentUser,nw);$("#currentAdminPin").value=$("#newAdminPin").value="";toast("관리자 번호를 변경했습니다.");}catch(e){console.error(e);toast("현재 관리자 번호를 확인해 주세요.");}};
 
-async function refreshStudents(){const s=await getDocs(collection(db,"students"));studentCache=s.docs.map(d=>({id:d.id,...d.data()}));const joined=studentCache.length,done=studentCache.filter(x=>x.progress?.completed).length;$("#statJoined").textContent=joined;$("#statDone").textContent=done;$("#statDoing").textContent=joined-done;renderStudentTable();}
+async function refreshStudents(){const s=await getDocs(collection(db,"students"));studentCache=s.docs.filter(d=>!d.id.startsWith("__lottery_")).map(d=>({id:d.id,...d.data()}));const joined=studentCache.length,done=studentCache.filter(x=>x.progress?.completed).length;$("#statJoined").textContent=joined;$("#statDone").textContent=done;$("#statDoing").textContent=joined-done;renderStudentTable();}
 $("#classTabs").addEventListener("click",e=>{if(!e.target.dataset.class)return;selectedAdminClass=+e.target.dataset.class;$$("#classTabs button").forEach(b=>b.classList.toggle("active",+b.dataset.class===selectedAdminClass));renderStudentTable();});$("#studentSearch").oninput=renderStudentTable;
-function renderStudentTable(){const q=$("#studentSearch").value.trim().toLowerCase();const rows=studentCache.filter(s=>s.cls===selectedAdminClass).filter(s=>!q||String(s.num).includes(q)||(s.name||"").toLowerCase().includes(q)).sort((a,b)=>a.num-b.num),m=new Map(rows.map(r=>[r.num,r]));$("#studentTableBody").innerHTML=Array.from({length:28},(_,i)=>{const n=i+1,s=m.get(n);if(!s)return `<tr><td>${n}</td><td>-</td><td>미참여</td><td>0/20</td><td>-</td><td>-</td><td></td></tr>`;const a=Object.values(s.progress?.answers||{}),first=a.filter(x=>x.firstCorrect).length;const draw=s.progress?.prizeDraw?.done?(s.progress.prizeDraw.won?"🍬 당첨":"꽝"):"-";return `<tr><td>${n}</td><td>${s.name}</td><td>${s.progress?.completed?"✅ 완료":"진행 중"}</td><td>${s.progress?.doneCount||0}/20</td><td>${first}/${a.length||0}</td><td>${draw}</td><td><button class="ghost small reset-student" data-id="${s.id}">초기화</button></td></tr>`;}).join("");$$(".reset-student").forEach(b=>b.onclick=async()=>{if(confirm("이 학생의 기록을 초기화할까요?")){await deleteDoc(doc(db,"students",b.dataset.id));await refreshStudents();}});}
+function renderStudentTable(){const q=$("#studentSearch").value.trim().toLowerCase();const rows=studentCache.filter(s=>s.cls===selectedAdminClass).filter(s=>!q||String(s.num).includes(q)||(s.name||"").toLowerCase().includes(q)).sort((a,b)=>a.num-b.num),m=new Map(rows.map(r=>[r.num,r]));$("#studentTableBody").innerHTML=Array.from({length:28},(_,i)=>{const n=i+1,s=m.get(n);if(!s)return `<tr><td>${n}</td><td>-</td><td>미참여</td><td>0/20</td><td>-</td><td>-</td><td></td></tr>`;const a=Object.values(s.progress?.answers||{}),first=a.filter(x=>x.firstCorrect).length;const draw=s.progress?.prizeDraw?.done?(s.progress.prizeDraw.won?"🍬 당첨":"꽝"):"-";return `<tr><td>${n}</td><td>${s.name}</td><td>${s.progress?.completed?"✅ 완료":"진행 중"}</td><td>${s.progress?.doneCount||0}/20</td><td>${first}/${a.length||0}</td><td>${draw}</td><td><button class="ghost small reset-student" data-id="${s.id}">초기화</button></td></tr>`;}).join("");$$(".reset-student").forEach(b=>b.onclick=async()=>{if(confirm("이 학생의 기록을 초기화할까요?")){await resetStudentRecord(b.dataset.id);await refreshStudents();}});}
 $("#downloadCsvBtn").onclick=()=>{const h=["반","번호","이름","완료 여부","완료 문항 수","첫 시도 정답률","도움 받은 문항 수","행운의 뽑기","시작 시각","완료 시각"];const r=studentCache.map(s=>{const a=Object.values(s.progress?.answers||{}),f=a.filter(x=>x.firstCorrect).length,hp=a.filter(x=>x.revealed).length;const draw=s.progress?.prizeDraw?.done?(s.progress.prizeDraw.won?"당첨":"꽝"):"미실시";return [s.cls,s.num,s.name,s.progress?.completed?"완료":"미완료",s.progress?.doneCount||0,a.length?Math.round(f/a.length*100)+"%":"",hp,draw,s.progress?.startedAt||"",s.progress?.completedAt||""];});const esc=v=>`"${String(v??"").replaceAll('"','""')}"`;const csv="\uFEFF"+[h,...r].map(x=>x.map(esc).join(",")).join("\n"),blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`인권지도_결과_${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);};
 
 function renderQuestionEditors(){$("#questionEditorList").innerHTML=questions.map((q,i)=>`<details class="editor-item" data-i="${i}"><summary>${i+1}. ${q.right}</summary><div class="editor-grid"><label class="span-2">상황<textarea data-k="situation" rows="3">${q.situation}</textarea></label><label>정답 권리<input data-k="right" value="${q.right}"></label><label>난이도<select data-k="difficulty"><option value="easy" ${q.difficulty==="easy"?"selected":""}>쉬움</option><option value="normal" ${q.difficulty==="normal"?"selected":""}>보통</option><option value="hard" ${q.difficulty==="hard"?"selected":""}>생각하기</option></select></label><label>오답 1<input data-w="0" value="${q.wrong[0]}"></label><label>오답 2<input data-w="1" value="${q.wrong[1]}"></label><label>오답 3<input data-w="2" value="${q.wrong[2]}"></label><label>분류<select data-k="zone">${Object.entries(ZONES).map(([k,v])=>`<option value="${k}" ${q.zone===k?"selected":""}>${v.label}</option>`).join("")}</select></label><label class="span-2">정답 설명<textarea data-k="explanation" rows="2">${q.explanation}</textarea></label><button class="primary save-question" type="button">이 문제 저장</button></div></details>`).join("");$$(".save-question").forEach(btn=>btn.onclick=async()=>{const d=btn.closest(".editor-item"),i=+d.dataset.i,q={...questions[i],wrong:[...questions[i].wrong]};d.querySelectorAll("[data-k]").forEach(el=>q[el.dataset.k]=el.value);d.querySelectorAll("[data-w]").forEach(el=>q.wrong[+el.dataset.w]=el.value);questions[i]=q;await setDoc(doc(db,"config","questions"),{items:questions,contentVersion:CONTENT_VERSION,updatedAt:serverTimestamp()});toast("문제를 저장했습니다.");});}
